@@ -11,36 +11,22 @@ const style = {
   backgroundColor: "background.paper",
 };
 
-function SpendResult({ data }) {
-  const spends = [
-    {
-      amount: 20,
-      from: "Alice",
-      to: "Bob",
-    },
-    {
-      amount: 5,
-      from: "John",
-      to: "Alice",
-    },
-  ];
+function SpendResult({ data, people }) {
+  // group name based on person_id
+  let peopleMap = {};
+  for (let obj of people) {
+    peopleMap[obj.person_id] = obj.personName;
+  }
 
-  // return spends.map((spend, index) => (
-  //   <div key={index} style={{ marginBottom: "10px" }}>
-  //     <span>
-  //       {spend.amount} {spend.from} need to pay {spend.to}
-  //     </span>
-  //   </div>
-  // ));
   return (
     <List sx={style}>
-      {data.map((spend, index) => (
+      {data?.transactions?.map((spend, index) => (
         <React.Fragment key={index}>
           <ListItem>
             <ListItemText
               primary={`₹ ${spend.amount.toFixed(2)} : ${
-                spend.from
-              } should pay ${spend.to}`}
+                peopleMap[spend.from_person_id]
+              } should pay ${peopleMap[spend.to_person_id]}`}
             />
           </ListItem>
           <Divider component="li" />
