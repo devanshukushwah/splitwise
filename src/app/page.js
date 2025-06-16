@@ -87,7 +87,10 @@ const SpendTrackerPage = () => {
   const handleCloseAddPerson = (person) => {
     setOpenPersonDialog(false);
     if (person) {
-      const newPeople = [...people, { ...person, id: people.length + 1 }];
+      const newPeople = [
+        ...people,
+        { ...person, person_id: people.length + 1 },
+      ];
       setPeople(newPeople);
       saveToLocalStorage(AppConstants.PEOPLE, newPeople);
     }
@@ -102,6 +105,7 @@ const SpendTrackerPage = () => {
 
   useEffect(() => {
     const newReport = GenerateSpendReport(spends, people);
+    console.log(newReport);
     setReport(newReport);
   }, [spends, people]);
 
@@ -195,6 +199,7 @@ const SpendTrackerPage = () => {
               <TableCell>Title</TableCell>
               <TableCell>Spend Amount</TableCell>
               <TableCell>Spend By</TableCell>
+              <TableCell>Spend For</TableCell>
               <TableCell>Time</TableCell>
             </TableRow>
           </TableHead>
@@ -204,6 +209,7 @@ const SpendTrackerPage = () => {
                 <TableCell>{spend.title}</TableCell>
                 <TableCell>₹ {spend.amount}</TableCell>
                 <TableCell>{spend.spender.personName}</TableCell>
+                <TableCell>All</TableCell>
                 <TableCell>{new Date(spend.time).toLocaleString()}</TableCell>
               </TableRow>
             ))}
@@ -218,7 +224,7 @@ const SpendTrackerPage = () => {
         </Table>
       </TableContainer>
       <Divider sx={{ margin: 2 }} />
-      <SpendResult data={report} />
+      <SpendResult data={report} people={people} />
     </Box>
   );
 };
