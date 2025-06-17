@@ -1,13 +1,15 @@
 export default function GenerateSpendReport(totalSpends, people) {
+  // Ensure totalSpends is an array of objects with spender and amount in float properties
   const newTotalSpends = totalSpends.map((spend) => ({
+    ...spend,
     person_id: spend.spender.person_id,
     amount: parseFloat(spend.amount),
-    ...spend,
   }));
+
   return main(newTotalSpends, people);
 }
 
-const findTotalSpends = (people, spends) => {
+const findTotalSpends = (spends, people) => {
   let totalSpends = {};
   for (let { person_id } of people) {
     totalSpends[person_id] = spends
@@ -18,7 +20,7 @@ const findTotalSpends = (people, spends) => {
 };
 
 const findTransactionForNormalize = (totalSpends, people) => {
-  const peopleSize = Object.keys(people).length;
+  const peopleSize = Object.keys(people).length; // divided into these persons
 
   let transactions = [];
 
@@ -79,10 +81,8 @@ function optimizeTransactions(transactions) {
 }
 
 const main = (spends, people) => {
-  const totalSpends = findTotalSpends(people, spends);
-
+  const totalSpends = findTotalSpends(spends, people);
   const transactions = findTransactionForNormalize(totalSpends, people);
   const optimizedTransactions = optimizeTransactions(transactions);
-
   return { transactions, optimizedTransactions };
 };
