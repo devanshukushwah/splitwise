@@ -23,61 +23,80 @@ import {
   MenuItem,
   Stack,
   Divider,
+  IconButton,
 } from "@mui/material";
 import SpendResult from "@/components/SpendResult";
 import GenerateSpendReport from "@/core/GenerateSpendReport";
 import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import {
   loadFromLocalStorageElseDefault,
   saveToLocalStorage,
 } from "../utils/MyLocalStorage";
 import { AppConstants } from "../common/AppConstants";
+import SpendDialog from "@/components/SpendDialog";
 
 const SpendTrackerPage = () => {
   const [open, setOpen] = useState(false);
+  const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
   const [people, setPeople] = useState(
     loadFromLocalStorageElseDefault(AppConstants.PEOPLE, [])
   );
+  const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState(
     loadFromLocalStorageElseDefault(AppConstants.SPENDS, [])
   );
+  const [editSpend, setEditSpend] = useState(null);
+
+  useEffect(() => {
+    let peopleMap = {};
+    for (let obj of people) {
+      peopleMap[obj.person_id] = obj.personName;
+    }
+    setPeopleMap(peopleMap);
+  }, [people]);
 
   const [report, setReport] = useState([]);
 
-  const [form, setForm] = useState({
-    title: "",
-    amount: "",
-    spender: "",
-    time: "",
-  });
-
   const handleOpen = () => {
-    setForm({
-      title: "",
-      amount: "",
-      spender: "",
-      time: getCurrentUTCDateTimeLocal(),
-    });
     setOpen(true);
   };
 
   const handleClose = () => {
     setOpen(false);
-    setForm({ title: "", amount: "", spender: "", time: "" });
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const handleEditOpen = (spend_id) => {
+    // console.log(spend_id);
+    const spend = spends.find((item) => item.spend_id === spend_id);
+    setEditSpend({ ...spend });
+    console.log(spend);
+
+    setEditDialog(true);
   };
 
-  const handleAddSpend = () => {
-    const newSpends = [...spends, form];
+  const handleEditClose = () => {
+    setEditDialog(false);
+  };
+
+  const handleAddSpend = (form) => {
+    const newSpends = [...spends, { ...form, spend_id: spends.length + 1 }];
     setSpends(newSpends);
     saveToLocalStorage(AppConstants.SPENDS, newSpends);
     handleClose();
+  };
+
+  const handleEditSpend = (form) => {
+    const updatedSpends = spends.map((spend) =>
+      spend.spend_id === form.spend_id ? { ...form } : spend
+    );
+    setSpends(updatedSpends);
+    saveToLocalStorage(AppConstants.SPENDS, updatedSpends);
+    setEditDialog(false);
+    setEditSpend(null);
   };
 
   const handleOpenAddPerson = () => {
@@ -105,9 +124,12 @@ const SpendTrackerPage = () => {
 
   useEffect(() => {
     const newReport = GenerateSpendReport(spends, people);
-    console.log(newReport);
     setReport(newReport);
   }, [spends, people]);
+
+  const getPersonNames = (spendFor) => {
+    return spendFor.map((id) => peopleMap[id] || "Unknown").join(", ");
+  };
 
   return (
     <Box p={4}>
@@ -124,6 +146,7 @@ const SpendTrackerPage = () => {
           onClick={handleOpen}
           disabled={people.length === 0}
           startIcon={<AddIcon />}
+          color="secondary"
         >
           Add Spend
         </Button>
@@ -131,66 +154,25 @@ const SpendTrackerPage = () => {
           variant="contained"
           onClick={handleReset}
           startIcon={<RestartAltIcon />}
+          color="error"
         >
           Reset
         </Button>
       </Stack>
       <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Add New Spend</DialogTitle>
-        <DialogContent>
-          <TextField
-            margin="dense"
-            label="Title"
-            name="title"
-            fullWidth
-            variant="standard"
-            value={form.title}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            label="Spend Amount"
-            name="amount"
-            type="number"
-            fullWidth
-            variant="standard"
-            value={form.amount}
-            onChange={handleChange}
-          />
-          <TextField
-            margin="dense"
-            label="Spend By"
-            name="spender"
-            fullWidth
-            select
-            variant="standard"
-            value={form.spender}
-            onChange={handleChange}
-          >
-            {people.map((person, idx) => (
-              <MenuItem key={idx} value={person}>
-                {person.personName}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            margin="dense"
-            label="Time"
-            name="time"
-            type="datetime-local"
-            fullWidth
-            variant="standard"
-            InputLabelProps={{ shrink: true }}
-            value={form.time}
-            onChange={handleChange}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleAddSpend}>Add</Button>
-        </DialogActions>
-      </Dialog>
+      <SpendDialog
+        open={open}
+        people={people}
+        onClose={handleClose}
+        onSubmit={handleAddSpend}
+      />
+      <SpendDialog
+        open={editDialog}
+        people={people}
+        onClose={handleEditClose}
+        onSubmit={handleEditSpend}
+        item={editSpend}
+      />
 
       <TableContainer component={Paper} sx={{ marginTop: 4 }}>
         <Table>
@@ -206,10 +188,18 @@ const SpendTrackerPage = () => {
           <TableBody>
             {spends.map((spend, index) => (
               <TableRow key={index}>
-                <TableCell>{spend.title}</TableCell>
+                <TableCell>
+                  <IconButton
+                    aria-label="edit"
+                    onClick={() => handleEditOpen(spend.spend_id)}
+                  >
+                    <EditIcon />
+                  </IconButton>
+                  {spend.title}
+                </TableCell>
                 <TableCell>₹ {spend.amount}</TableCell>
-                <TableCell>{spend.spender.personName}</TableCell>
-                <TableCell>All</TableCell>
+                <TableCell>{peopleMap[spend.spender]}</TableCell>
+                <TableCell>{getPersonNames(spend.spend_for)}</TableCell>
                 <TableCell>{new Date(spend.time).toLocaleString()}</TableCell>
               </TableRow>
             ))}

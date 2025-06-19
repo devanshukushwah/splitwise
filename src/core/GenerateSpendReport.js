@@ -2,87 +2,90 @@ export default function GenerateSpendReport(totalSpends, people) {
   // Ensure totalSpends is an array of objects with spender and amount in float properties
   const newTotalSpends = totalSpends.map((spend) => ({
     ...spend,
-    person_id: spend.spender.person_id,
+    person_id: spend.spender,
     amount: parseFloat(spend.amount),
   }));
 
   return main(newTotalSpends, people);
 }
 
-const findTotalSpends = (spends, people) => {
-  let totalSpends = {};
-  for (let { person_id } of people) {
-    totalSpends[person_id] = spends
-      .filter((spend) => spend.person_id == person_id)
-      .reduce((sum, { amount }) => sum + amount, 0);
-  }
-  return totalSpends;
-};
-
-const findTransactionForNormalize = (totalSpends, people) => {
-  const peopleSize = Object.keys(people).length; // divided into these persons
-
+const findTransactions = (spends) => {
   let transactions = [];
 
-  for (let toPersonId in totalSpends) {
-    const amount = totalSpends[toPersonId];
-    const dividedAmount = amount / peopleSize;
+  for (let { spend_for, amount, person_id } of spends) {
+    const dividedAmount = amount / spend_for.length;
 
-    if (dividedAmount == 0) continue; // avoid zero currency transaction.
-
-    for (let { person_id: fromPersonId } of people) {
-      if (fromPersonId == toPersonId) continue; // don't push transaction for same person_id.
-      transactions.push({
-        from_person_id: fromPersonId,
-        to_person_id: parseInt(toPersonId),
-        amount: dividedAmount,
-      });
+    for (let spend_id of spend_for) {
+      if (spend_id != person_id) {
+        const transaction = {
+          from_person_id: spend_id,
+          to_person_id: person_id,
+          amount: dividedAmount,
+        };
+        transactions.push(transaction);
+      }
     }
   }
 
   return transactions;
 };
 
-// Function to optimize transactions
-function optimizeTransactions(transactions) {
-  // Create a map to track net balances between pairs
-  const balanceMap = new Map();
+const findAccumulateTransactions = (transactions) => {
+  const transactionMap = new Map();
 
-  // Calculate net balances
+  // Iterate over each transaction
   transactions.forEach((transaction) => {
     const key = `${transaction.from_person_id}-${transaction.to_person_id}`;
-    const reverseKey = `${transaction.to_person_id}-${transaction.from_person_id}`;
-
-    if (balanceMap.has(reverseKey)) {
-      // If there's a reverse transaction, adjust the balance
-      const reverseAmount = balanceMap.get(reverseKey);
-      if (reverseAmount > transaction.amount) {
-        balanceMap.set(reverseKey, reverseAmount - transaction.amount);
-      } else if (reverseAmount < transaction.amount) {
-        balanceMap.delete(reverseKey);
-        balanceMap.set(key, transaction.amount - reverseAmount);
-      } else {
-        balanceMap.delete(reverseKey);
-      }
+    if (transactionMap.has(key)) {
+      transactionMap.get(key).amount += transaction.amount;
     } else {
-      // Otherwise, add the transaction to the map
-      balanceMap.set(key, transaction.amount);
+      transactionMap.set(key, { ...transaction });
     }
   });
 
-  // Reconstruct the optimized list of transactions
-  const optimizedTransactions = [];
-  balanceMap.forEach((amount, key) => {
-    const [from_person_id, to_person_id] = key.split("-").map(Number);
-    optimizedTransactions.push({ from_person_id, to_person_id, amount });
+  // Convert the map back to an array of transactions
+  return Array.from(transactionMap.values());
+};
+
+const findOptimizeTransactions4 = (transactions) => {
+  let transactionMap = new Map();
+
+  transactions.forEach((transaction) => {
+    const { from_person_id, to_person_id } = transaction;
+    const key = `${from_person_id}-${to_person_id}`;
+    const reverseKey = `${to_person_id}-${from_person_id}`;
+
+    if (transactionMap.has(reverseKey)) {
+      const existingTransaction = transactionMap.get(reverseKey);
+      if (transaction.amount > existingTransaction.amount) {
+        transactionMap.set(key, {
+          amount: transaction.amount - existingTransaction.amount,
+          from_person_id: transaction.from_person_id,
+          to_person_id: transaction.to_person_id,
+        });
+      } else if (transaction.amount < existingTransaction.amount) {
+        existingTransaction.amount -= transaction.amount;
+        transactionMap.set(key, existingTransaction);
+      }
+
+      transactionMap.delete(reverseKey);
+    } else {
+      transactionMap.set(key, { ...transaction });
+    }
   });
 
-  return optimizedTransactions;
-}
+  // Convert the map back to an array of transactions
+  return Array.from(transactionMap.values());
+};
 
 const main = (spends, people) => {
-  const totalSpends = findTotalSpends(spends, people);
-  const transactions = findTransactionForNormalize(totalSpends, people);
-  const optimizedTransactions = optimizeTransactions(transactions);
+  let transactions = findTransactions(spends);
+
+  const accumulateTransactions = findAccumulateTransactions(transactions);
+
+  const optimizedTransactions = findOptimizeTransactions4(
+    accumulateTransactions
+  );
+
   return { transactions, optimizedTransactions };
 };
