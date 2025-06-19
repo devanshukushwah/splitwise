@@ -41,11 +41,14 @@ const AddPersonDialog = ({ open, onClose }) => {
           variant="standard"
           value={personName}
           onChange={(e) => setPersonName(e.target.value)}
+          placeholder="Enter person's name"
         />
       </DialogContent>
       <DialogActions>
         <Button onClick={handleOnClose}>Cancel</Button>
-        <Button onClick={handleAddPerson}>Add</Button>
+        <Button onClick={handleAddPerson} variant="contained">
+          Add
+        </Button>
       </DialogActions>
     </Dialog>
   );
