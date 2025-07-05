@@ -37,6 +37,7 @@ import {
 } from "../utils/MyLocalStorage";
 import { AppConstants } from "../common/AppConstants";
 import SpendDialog from "@/components/SpendDialog";
+import Header from "@/components/Header";
 
 const SpendTrackerPage = () => {
   const [open, setOpen] = useState(false);
@@ -222,6 +223,7 @@ const SpendTrackerPage = () => {
 function home() {
   return (
     <>
+      <Header />
       <SpendTrackerPage />
     </>
   );
