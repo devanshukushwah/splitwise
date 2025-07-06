@@ -27,21 +27,23 @@ export default function Header() {
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2 }}>
-          <Button
-            color="inherit"
-            startIcon={<DashboardIcon />}
-            onClick={() => router.push("/dashboard")}
-          >
-            Home
-          </Button>
           {localStorage.getItem("token") ? (
-            <Button
-              color="inherit"
-              onClick={handleLogoutClick}
-              startIcon={<LogoutIcon />}
-            >
-              Logout
-            </Button>
+            <>
+              <Button
+                color="inherit"
+                startIcon={<DashboardIcon />}
+                onClick={() => router.push("/dashboard")}
+              >
+                Dashboard
+              </Button>
+              <Button
+                color="inherit"
+                onClick={handleLogoutClick}
+                startIcon={<LogoutIcon />}
+              >
+                Logout
+              </Button>
+            </>
           ) : (
             <Button
               color="inherit"
