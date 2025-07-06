@@ -6,17 +6,19 @@ import { useRouter } from "next/navigation"; // Use 'next/navigation' if using A
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import { useLocalStorage } from "usehooks-ts";
 
 export default function Header() {
   const router = useRouter();
+  const [token, setToken, removeToken] = useLocalStorage("token", null);
 
   const handleLoginClick = () => {
     router.push("/login");
   };
 
   const handleLogoutClick = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+    removeToken();
+    router.push("/");
   };
 
   return (
@@ -27,7 +29,7 @@ export default function Header() {
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2 }}>
-          {localStorage.getItem("token") ? (
+          {token ? (
             <>
               <Button
                 color="inherit"

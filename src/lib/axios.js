@@ -13,7 +13,7 @@ api.interceptors.request.use(
       const token = localStorage.getItem("token"); // or use cookie/sessionStorage
 
       if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+        config.headers.Authorization = `Bearer ${token.replace(/"/g, "")}`; // Remove quotes if stored with quotes
       }
     }
 

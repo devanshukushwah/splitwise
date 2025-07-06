@@ -12,11 +12,13 @@ import {
 import axios from "axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import { useRouter } from "next/navigation";
+import { useLocalStorage } from "usehooks-ts";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [token, setToken, removeToken] = useLocalStorage("token", null);
 
   const router = useRouter(); // ✅ initialize router
 
@@ -36,7 +38,7 @@ export default function LoginPage() {
       });
       const token = response.data.token;
       // Save token in localStorage
-      localStorage.setItem("token", token);
+      setToken(token); // Update local state with the token
       setError(""); // Clear any previous error
       router.push("/dashboard");
     } catch (err) {
