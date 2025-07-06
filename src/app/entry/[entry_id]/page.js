@@ -66,7 +66,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   const handleEditOpen = (spend_id) => {
-    const spend = spends.find((item) => item.spend_id === spend_id);
+    const spend = spends.find((item) => item._id === spend_id);
     setEditSpend({ ...spend });
     setEditDialog(true);
   };
@@ -86,13 +86,21 @@ const SpendTrackerPage = ({ entry_id }) => {
     });
   };
 
-  const handleEditSpend = (form) => {
-    const updatedSpends = spends.map((spend) =>
-      spend.spend_id === form.spend_id ? { ...form } : spend
-    );
-    setSpends(updatedSpends);
-    setEditDialog(false);
-    setEditSpend(null);
+  const handleEditSpend = (spend) => {
+    api
+      .put(HttpUrlConfig.putSpendsUrl(entry_id, spend._id), spend)
+      .then((response) => {
+        console.log("Spend updated successfully:", response.data);
+        const updatedSpends = spends.map((item) =>
+          item._id === spend._id ? { ...spend } : item
+        );
+        setSpends(updatedSpends);
+        setEditDialog(false);
+        setEditSpend(null);
+      })
+      .catch((error) => {
+        console.error("Error updating spend:", error);
+      });
   };
 
   const handleOpenAddPerson = () => {
@@ -206,7 +214,7 @@ const SpendTrackerPage = ({ entry_id }) => {
                 <TableCell>
                   <IconButton
                     aria-label="edit"
-                    onClick={() => handleEditOpen(spend.spend_id)}
+                    onClick={() => handleEditOpen(spend._id)}
                   >
                     <EditIcon />
                   </IconButton>

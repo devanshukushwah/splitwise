@@ -5,6 +5,7 @@ import { AppBar, Toolbar, Typography, Button, Box } from "@mui/material";
 import { useRouter } from "next/navigation"; // Use 'next/navigation' if using App Router
 import LoginIcon from "@mui/icons-material/Login";
 import LogoutIcon from "@mui/icons-material/Logout";
+import DashboardIcon from "@mui/icons-material/Dashboard";
 
 export default function Header() {
   const router = useRouter();
@@ -25,7 +26,14 @@ export default function Header() {
           SPLITWISE
         </Typography>
 
-        <Box>
+        <Box sx={{ display: "flex", gap: 2 }}>
+          <Button
+            color="inherit"
+            startIcon={<DashboardIcon />}
+            onClick={() => router.push("/dashboard")}
+          >
+            Home
+          </Button>
           {localStorage.getItem("token") ? (
             <Button
               color="inherit"

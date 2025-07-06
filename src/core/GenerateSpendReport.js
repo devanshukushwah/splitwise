@@ -14,7 +14,7 @@ const findTransactions = (spends) => {
   let transactions = [];
 
   for (let { spend_for, amount, person_id } of spends) {
-    const dividedAmount = amount / spend_for.length;
+    const dividedAmount = amount / spend_for?.length;
 
     for (let spend_id of spend_for) {
       if (spend_id != person_id) {
