@@ -1,0 +1,111 @@
+"use client";
+
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Typography,
+  Stack,
+} from "@mui/material";
+import { useState } from "react";
+import EastIcon from "@mui/icons-material/East";
+import { useRouter } from "next/navigation";
+
+export default function EntryList({ entries = [], onAdd }) {
+  const [open, setOpen] = useState(false);
+  const [entryName, setEntryName] = useState("");
+  const router = useRouter();
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setEntryName("");
+    setOpen(false);
+  };
+
+  const handleSubmit = () => {
+    if (entryName.trim() === "") return;
+    onAdd({ title: entryName.trim() });
+    handleClose();
+  };
+
+  const handleGoClick = (entryId) => {
+    if (!entryId) return;
+    router.push(`/entry/${entryId}`);
+  };
+
+  return (
+    <Box sx={{ mt: 4 }}>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <Typography variant="h5">Entries</Typography>
+        <Button variant="contained" color="primary" onClick={handleOpen}>
+          Add Entry
+        </Button>
+      </Box>
+
+      <Stack spacing={2}>
+        {entries.length === 0 ? (
+          <Typography variant="body1" color="text.secondary">
+            No entries yet.
+          </Typography>
+        ) : (
+          entries.map((entry, index) => (
+            <Card key={index} variant="outlined">
+              <CardContent>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  alignItems="center"
+                  justifyContent="space-between"
+                >
+                  <Typography variant="body1">{entry.title}</Typography>
+                  <Button
+                    variant="outlined"
+                    color="secondary"
+                    startIcon={<EastIcon />}
+                    onClick={() => handleGoClick(entry._id)}
+                  >
+                    Go
+                  </Button>
+                </Stack>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </Stack>
+
+      {/* Dialog */}
+      <Dialog open={open} onClose={handleClose}>
+        <DialogTitle>Add New Entry</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Entry Name"
+            fullWidth
+            value={entryName}
+            onChange={(e) => setEntryName(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit} variant="contained" color="primary">
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+}

@@ -1,8 +1,9 @@
 export default function GenerateSpendReport(totalSpends, people) {
   // Ensure totalSpends is an array of objects with spender and amount in float properties
+
   const newTotalSpends = totalSpends.map((spend) => ({
     ...spend,
-    person_id: spend.spender,
+    person_id: spend.spend_by,
     amount: parseFloat(spend.amount),
   }));
 
