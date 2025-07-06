@@ -246,7 +246,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   );
 };
 
-function page({ params }) {
+function Page({ params }) {
   const { entry_id } = use(params);
 
   return (
@@ -257,4 +257,4 @@ function page({ params }) {
   );
 }
 
-export default page;
+export default Page;
