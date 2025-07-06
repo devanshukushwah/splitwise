@@ -72,7 +72,7 @@ function SpendResult({ data, people }) {
   // group name based on person_id
   let peopleMap = {};
   for (let obj of people) {
-    peopleMap[obj.person_id] = obj.personName;
+    peopleMap[obj._id] = obj.name;
   }
 
   return (

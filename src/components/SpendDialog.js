@@ -16,9 +16,9 @@ import React, { useEffect } from "react";
 const defaultValue = () => ({
   title: "",
   amount: "",
-  spender: "",
+  spend_by: "",
   spend_for: [],
-  time: getCurrentUTCDateTimeLocal(),
+  created_at: getCurrentUTCDateTimeLocal(),
 });
 
 function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
@@ -30,8 +30,8 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
 
   const handleSubmit = () => {
     const spendData = { ...spend };
-    if (item?.spend_id) {
-      spendData.spend_id = item.spend_id;
+    if (item?._id) {
+      spendData._id = item._id;
     }
     onSubmit(spendData);
     setSpend(defaultValue());
@@ -46,7 +46,7 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
     if (item) {
       setSpend({
         ...item,
-        time: getCurrentUTCDateTimeLocal(),
+        created_at: getCurrentUTCDateTimeLocal(),
       });
     } else {
       setSpend(defaultValue());
@@ -80,16 +80,16 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
           <TextField
             margin="dense"
             label="Spend By"
-            name="spender"
+            name="spend_by"
             fullWidth
             select
             variant="standard"
-            value={spend?.spender}
+            value={spend?.spend_by}
             onChange={handleChange}
           >
             {people.map((person, idx) => (
-              <MenuItem key={idx} value={person.person_id}>
-                {person.personName}
+              <MenuItem key={idx} value={person._id}>
+                {person.name}
               </MenuItem>
             ))}
           </TextField>
@@ -103,8 +103,8 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
               multiple: true,
               renderValue: (selected) =>
                 people
-                  .filter((p) => selected.includes(p.person_id))
-                  .map((p) => p.personName)
+                  .filter((p) => selected.includes(p._id))
+                  .map((p) => p.name)
                   .join(", "),
             }}
             variant="standard"
@@ -117,34 +117,23 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
             }}
           >
             {people.map((person, idx) => (
-              <MenuItem key={idx} value={person.person_id}>
-                {/* <input
-                  type="checkbox"
-                  checked={
-                    spend?.spend_for?.includes(person.person_id) || false
-                  }
-                  style={{ marginRight: 8 }}
-                  readOnly
-                />
-                {person.personName} */}
+              <MenuItem key={idx} value={person._id}>
                 <Checkbox
-                  checked={
-                    spend?.spend_for?.includes(person.person_id) || false
-                  }
+                  checked={spend?.spend_for?.includes(person._id) || false}
                 />
-                <ListItemText primary={person.personName} />
+                <ListItemText primary={person.name} />
               </MenuItem>
             ))}
           </TextField>
           <TextField
             margin="dense"
             label="Time"
-            name="time"
+            name="created_at"
             type="datetime-local"
             fullWidth
             variant="standard"
             InputLabelProps={{ shrink: true }}
-            value={spend?.time}
+            value={spend?.created_at}
             onChange={handleChange}
           />
         </DialogContent>

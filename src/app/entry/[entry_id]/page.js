@@ -1,8 +1,10 @@
 "use client";
 
+import Header from "@/components/Header";
+import { use } from "react";
 import React, { useEffect, useState } from "react";
-import AddPersonDialog from "../components/AddPersonDialog";
-import { getCurrentUTCDateTimeLocal } from "../utils/DateUtils";
+import AddPersonDialog from "@/components/AddPersonDialog";
+import { getCurrentUTCDateTimeLocal } from "@/utils/DateUtils";
 import {
   Box,
   Button,
@@ -31,31 +33,24 @@ import PersonIcon from "@mui/icons-material/Person";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
-import {
-  loadFromLocalStorageElseDefault,
-  saveToLocalStorage,
-} from "../utils/MyLocalStorage";
-import { AppConstants } from "../common/AppConstants";
+import { AppConstants } from "@/common/AppConstants";
 import SpendDialog from "@/components/SpendDialog";
-import Header from "@/components/Header";
+import api from "@/lib/axios";
+import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 
-const SpendTrackerPage = () => {
+const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
-  const [people, setPeople] = useState(
-    loadFromLocalStorageElseDefault(AppConstants.PEOPLE, [])
-  );
+  const [people, setPeople] = useState([]);
   const [peopleMap, setPeopleMap] = useState({});
-  const [spends, setSpends] = useState(
-    loadFromLocalStorageElseDefault(AppConstants.SPENDS, [])
-  );
+  const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
 
   useEffect(() => {
     let peopleMap = {};
     for (let obj of people) {
-      peopleMap[obj.person_id] = obj.personName;
+      peopleMap[obj._id] = obj.name;
     }
     setPeopleMap(peopleMap);
   }, [people]);
@@ -71,7 +66,7 @@ const SpendTrackerPage = () => {
   };
 
   const handleEditOpen = (spend_id) => {
-    const spend = spends.find((item) => item.spend_id === spend_id);
+    const spend = spends.find((item) => item._id === spend_id);
     setEditSpend({ ...spend });
     setEditDialog(true);
   };
@@ -80,44 +75,55 @@ const SpendTrackerPage = () => {
     setEditDialog(false);
   };
 
-  const handleAddSpend = (form) => {
-    const newSpends = [...spends, { ...form, spend_id: spends.length + 1 }];
-    setSpends(newSpends);
-    saveToLocalStorage(AppConstants.SPENDS, newSpends);
-    handleClose();
+  const handleAddSpend = (spend) => {
+    api.post(HttpUrlConfig.postSpendUrl(entry_id), spend).then((response) => {
+      handleClose();
+      const newSpends = [
+        ...spends,
+        { ...spend, _id: response.data.data.spend_id },
+      ];
+      setSpends(newSpends);
+    });
   };
 
-  const handleEditSpend = (form) => {
-    const updatedSpends = spends.map((spend) =>
-      spend.spend_id === form.spend_id ? { ...form } : spend
-    );
-    setSpends(updatedSpends);
-    saveToLocalStorage(AppConstants.SPENDS, updatedSpends);
-    setEditDialog(false);
-    setEditSpend(null);
+  const handleEditSpend = (spend) => {
+    api
+      .put(HttpUrlConfig.putSpendsUrl(entry_id, spend._id), spend)
+      .then((response) => {
+        console.log("Spend updated successfully:", response.data);
+        const updatedSpends = spends.map((item) =>
+          item._id === spend._id ? { ...spend } : item
+        );
+        setSpends(updatedSpends);
+        setEditDialog(false);
+        setEditSpend(null);
+      })
+      .catch((error) => {
+        console.error("Error updating spend:", error);
+      });
   };
 
   const handleOpenAddPerson = () => {
     setOpenPersonDialog(true);
   };
 
-  const handleCloseAddPerson = (person) => {
+  const handleCloseAddPerson = async (person) => {
     setOpenPersonDialog(false);
     if (person) {
-      const newPeople = [
-        ...people,
-        { ...person, person_id: people.length + 1 },
-      ];
-      setPeople(newPeople);
-      saveToLocalStorage(AppConstants.PEOPLE, newPeople);
-    }
-  };
+      api
+        .post(HttpUrlConfig.postPeopleUrl(entry_id), person)
+        .then((response) => {
+          const newPerson = {
+            _id: response?.data?.data?.person_id,
+            name: person.name,
+          };
 
-  const handleReset = () => {
-    setSpends([]);
-    setPeople([]);
-    saveToLocalStorage(AppConstants.SPENDS, []);
-    saveToLocalStorage(AppConstants.PEOPLE, []);
+          setPeople([...people, newPerson]);
+        })
+        .catch((error) => {
+          console.error("Error fetching people:", error);
+        });
+    }
   };
 
   useEffect(() => {
@@ -126,8 +132,35 @@ const SpendTrackerPage = () => {
   }, [spends, people]);
 
   const getPersonNames = (spendFor) => {
-    return spendFor.map((id) => peopleMap[id] || "Unknown").join(", ");
+    return spendFor?.map((id) => peopleMap[id] || "Unknown").join(", ");
   };
+
+  const fetchSpends = async () => {
+    api
+      .get(HttpUrlConfig.getSpendsUrl(entry_id))
+      .then((response) => {
+        setSpends(response?.data?.data?.spends || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching spends:", error);
+      });
+  };
+
+  const fetchPeople = async () => {
+    api
+      .get(HttpUrlConfig.getPeopleUrl(entry_id))
+      .then((response) => {
+        setPeople(response?.data?.data?.people || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching people:", error);
+      });
+  };
+
+  useEffect(() => {
+    fetchSpends();
+    fetchPeople();
+  }, []);
 
   return (
     <Box p={4}>
@@ -147,14 +180,6 @@ const SpendTrackerPage = () => {
           color="secondary"
         >
           Add Spend
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleReset}
-          startIcon={<RestartAltIcon />}
-          color="error"
-        >
-          Reset
         </Button>
       </Stack>
       <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
@@ -189,16 +214,20 @@ const SpendTrackerPage = () => {
                 <TableCell>
                   <IconButton
                     aria-label="edit"
-                    onClick={() => handleEditOpen(spend.spend_id)}
+                    onClick={() => handleEditOpen(spend._id)}
                   >
                     <EditIcon />
                   </IconButton>
                   {spend.title}
                 </TableCell>
                 <TableCell>₹ {spend.amount}</TableCell>
-                <TableCell>{peopleMap[spend.spender]}</TableCell>
-                <TableCell>{getPersonNames(spend.spend_for)}</TableCell>
-                <TableCell>{new Date(spend.time).toLocaleString()}</TableCell>
+                <TableCell>{peopleMap[spend.spend_by] || "None"}</TableCell>
+                <TableCell>
+                  {getPersonNames(spend.spend_for) || "None"}
+                </TableCell>
+                <TableCell>
+                  {new Date(spend.created_at).toLocaleString()}
+                </TableCell>
               </TableRow>
             ))}
             {spends.length === 0 && (
@@ -217,13 +246,15 @@ const SpendTrackerPage = () => {
   );
 };
 
-function home() {
+function Page({ params }) {
+  const { entry_id } = use(params);
+
   return (
     <>
       <Header />
-      <SpendTrackerPage />
+      <SpendTrackerPage entry_id={entry_id} />
     </>
   );
 }
 
-export default home;
+export default Page;

@@ -17,16 +17,16 @@ import {
 import React, { useState } from "react";
 
 const AddPersonDialog = ({ open, onClose }) => {
-  const [personName, setPersonName] = useState("");
+  const [name, setName] = useState("");
 
   const handleAddPerson = () => {
-    onClose({ personName });
-    setPersonName("");
+    onClose({ name });
+    setName("");
   };
 
   const handleOnClose = () => {
     onClose(null);
-    setPersonName("");
+    setName("");
   };
 
   return (
@@ -39,8 +39,8 @@ const AddPersonDialog = ({ open, onClose }) => {
           label="Person Name"
           fullWidth
           variant="standard"
-          value={personName}
-          onChange={(e) => setPersonName(e.target.value)}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           placeholder="Enter person's name"
         />
       </DialogContent>
