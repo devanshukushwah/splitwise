@@ -22,7 +22,7 @@ export async function POST(req) {
     );
   }
 
-  const token = jwt.sign({ email }, SECRET, { expiresIn: "1h" });
+  const token = jwt.sign({ email }, SECRET);
 
   return NextResponse.json({ token, success: true });
 }
