@@ -25,7 +25,7 @@ export default function Header() {
     <AppBar position="static" color="primary">
       <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h6" component="div">
-          SPLITWISE
+          Splitwise
         </Typography>
 
         <Box sx={{ display: "flex", gap: 2 }}>
