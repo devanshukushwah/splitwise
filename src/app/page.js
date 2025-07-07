@@ -55,7 +55,7 @@ const SpendTrackerPage = () => {
   useEffect(() => {
     let peopleMap = {};
     for (let obj of people) {
-      peopleMap[obj.person_id] = obj.personName;
+      peopleMap[obj._id] = obj.name;
     }
     setPeopleMap(peopleMap);
   }, [people]);
@@ -71,7 +71,7 @@ const SpendTrackerPage = () => {
   };
 
   const handleEditOpen = (spend_id) => {
-    const spend = spends.find((item) => item.spend_id === spend_id);
+    const spend = spends.find((item) => item._id === spend_id);
     setEditSpend({ ...spend });
     setEditDialog(true);
   };
@@ -81,15 +81,15 @@ const SpendTrackerPage = () => {
   };
 
   const handleAddSpend = (form) => {
-    const newSpends = [...spends, { ...form, spend_id: spends.length + 1 }];
+    const newSpends = [...spends, { ...form, _id: spends.length + 1 }];
     setSpends(newSpends);
     saveToLocalStorage(AppConstants.SPENDS, newSpends);
     handleClose();
   };
 
   const handleEditSpend = (form) => {
-    const updatedSpends = spends.map((spend) =>
-      spend.spend_id === form.spend_id ? { ...form } : spend
+    const updatedSpends = spends.map((item) =>
+      item._id === form._id ? { ...form } : spend
     );
     setSpends(updatedSpends);
     saveToLocalStorage(AppConstants.SPENDS, updatedSpends);
@@ -104,10 +104,7 @@ const SpendTrackerPage = () => {
   const handleCloseAddPerson = (person) => {
     setOpenPersonDialog(false);
     if (person) {
-      const newPeople = [
-        ...people,
-        { ...person, person_id: people.length + 1 },
-      ];
+      const newPeople = [...people, { ...person, _id: people.length + 1 }];
       setPeople(newPeople);
       saveToLocalStorage(AppConstants.PEOPLE, newPeople);
     }
@@ -196,9 +193,11 @@ const SpendTrackerPage = () => {
                   {spend.title}
                 </TableCell>
                 <TableCell>₹ {spend.amount}</TableCell>
-                <TableCell>{peopleMap[spend.spender]}</TableCell>
+                <TableCell>{peopleMap[spend.spend_by]}</TableCell>
                 <TableCell>{getPersonNames(spend.spend_for)}</TableCell>
-                <TableCell>{new Date(spend.time).toLocaleString()}</TableCell>
+                <TableCell>
+                  {new Date(spend.created_at).toLocaleString()}
+                </TableCell>
               </TableRow>
             ))}
             {spends.length === 0 && (
