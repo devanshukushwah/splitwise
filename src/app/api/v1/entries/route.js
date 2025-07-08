@@ -14,7 +14,9 @@ export const GET = withAuth(async (request) => {
   const skip = parseInt(searchParams.get("skip"), 0);
 
   const entries = await collection
-    .find({ created_by: email })
+    .find({
+      $or: [{ created_by: email }, { "shares.email": email }],
+    })
     .sort({ created_at: -1 })
     .limit(limit)
     .skip(skip)
