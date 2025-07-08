@@ -37,15 +37,19 @@ import { AppConstants } from "@/common/AppConstants";
 import SpendDialog from "@/components/SpendDialog";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
+import ShareIcon from "@mui/icons-material/Share";
+import ShareDialog from "@/components/ShareDialog";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
+  const [shareDialog, setShareDialog] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
   const [people, setPeople] = useState([]);
   const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
+  const [shares, setShares] = useState([]);
 
   useEffect(() => {
     let peopleMap = {};
@@ -160,7 +164,36 @@ const SpendTrackerPage = ({ entry_id }) => {
   useEffect(() => {
     fetchSpends();
     fetchPeople();
+    fetchShares();
   }, []);
+
+  const fetchShares = async () => {
+    api
+      .get(HttpUrlConfig.getSharesUrl(entry_id))
+      .then((response) => {
+        setShares(response?.data?.data?.shares || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching people:", error);
+      });
+  };
+
+  const handleShareClose = () => {
+    setShareDialog(false);
+  };
+
+  const handleShareSubmit = (email) => {
+    api
+      .post(HttpUrlConfig.postSharesUrl(entry_id), email)
+      .then((response) => {
+        if (response?.data?.success) {
+          fetchShares();
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching people:", error);
+      });
+  };
 
   return (
     <Box p={4}>
@@ -181,6 +214,13 @@ const SpendTrackerPage = ({ entry_id }) => {
         >
           Add Spend
         </Button>
+        <Button
+          variant="contained"
+          startIcon={<ShareIcon />}
+          onClick={() => setShareDialog(true)}
+        >
+          Share
+        </Button>
       </Stack>
       <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
       <SpendDialog
@@ -195,6 +235,12 @@ const SpendTrackerPage = ({ entry_id }) => {
         onClose={handleEditClose}
         onSubmit={handleEditSpend}
         item={editSpend}
+      />
+      <ShareDialog
+        open={shareDialog}
+        onClose={handleShareClose}
+        onSubmit={handleShareSubmit}
+        item={shares}
       />
 
       <TableContainer component={Paper} sx={{ marginTop: 4 }}>
