@@ -21,7 +21,7 @@ export async function POST(req) {
 
   if (dbUser) {
     return new Response(
-      JSON.stringify({ success: false, error: "user already exists" }),
+      JSON.stringify({ success: false, error: "User already exists" }),
       {
         headers: { "Content-Type": "application/json" },
         status: 400,

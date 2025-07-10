@@ -22,9 +22,16 @@ export async function POST(req) {
   const collection = db.collection(AppConstants.USERS);
   const user = await collection.findOne({ email: email.toLowerCase() });
 
+  if (!user) {
+    return NextResponse.json(
+      { error: "Account not exists", success: false },
+      { status: 401 }
+    );
+  }
+
   if (!user || !(await bcrypt.compare(password, user.password))) {
     return NextResponse.json(
-      { error: "Invalid credentials", success: false },
+      { error: "Password incorrect", success: false },
       { status: 401 }
     );
   }
