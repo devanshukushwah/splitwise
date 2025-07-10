@@ -6,6 +6,13 @@ import clientPromise from "@/lib/mongodb";
 export async function POST(req) {
   const { email, password } = await req.json();
 
+  if (!email || !password) {
+    return new Response(JSON.stringify({ error: "invalid data" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const client = await clientPromise;
   const db = client.db(); // default DB from connection string
   const collection = db.collection(AppConstants.USERS);
@@ -14,7 +21,7 @@ export async function POST(req) {
 
   if (dbUser) {
     return new Response(
-      JSON.stringify({ success: false, error: "user already exists" }),
+      JSON.stringify({ success: false, error: "User already exists" }),
       {
         headers: { "Content-Type": "application/json" },
         status: 400,
@@ -25,7 +32,7 @@ export async function POST(req) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const result = await collection.insertOne({
-    email,
+    email: email.toLowerCase(),
     password: hashedPassword,
   });
 

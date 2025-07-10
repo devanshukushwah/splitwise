@@ -8,15 +8,31 @@ import {
   Typography,
   Container,
   Paper,
+  Alert,
 } from "@mui/material";
 import axios from "axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
+import { AppConstants } from "@/common/AppConstants";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const startLoading = () => {
+    setLoading(true);
+  };
+
+  const stopLoading = ({ callback, timeout }) => {
+    setTimeout(() => {
+      setLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -33,10 +49,20 @@ export default function LoginPage() {
     }
 
     try {
-      const response = await axios.post(HttpUrlConfig.getRegisterUrl(), {
-        email,
-        password,
-      });
+      startLoading();
+      const response = await axios
+        .post(HttpUrlConfig.getRegisterUrl(), {
+          email,
+          password,
+        })
+        .then((response) => {
+          if (response.data.success) {
+            stopLoading({ callback: () => (window.location.href = "/login") });
+          } else {
+            setError(response.data.error || "Registration failed.");
+            stopLoading({ timeout: 0 }); // Stop loading state immediately
+          }
+        });
       setError(""); // Clear any previous error
     } catch (err) {
       if (err.response) {
@@ -44,6 +70,7 @@ export default function LoginPage() {
       } else {
         setError("An error occurred while logging in. Please try again.");
       }
+      stopLoading({ timeout: 0 }); // Stop loading state immediately
     }
   };
 
@@ -82,14 +109,29 @@ export default function LoginPage() {
             />
 
             {error && (
-              <Typography color="error" variant="body2">
+              <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
-              </Typography>
+              </Alert>
             )}
 
-            <Button type="submit" variant="contained" color="primary" fullWidth>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              fullWidth
+              loading={loading}
+            >
               Register
             </Button>
+            <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+              Already have an account?&nbsp;
+              <a
+                href="/login"
+                style={{ color: "#1976d2", textDecoration: "none" }}
+              >
+                Log in
+              </a>
+            </Typography>
           </Box>
         </form>
       </Paper>

@@ -43,7 +43,7 @@ export const POST = withAuth(async (request, { params }) => {
   }
 
   const newShare = {
-    email,
+    email: email.toLowerCase(),
     created_at: new Date(),
     created_by: loggedInUser.email,
   };

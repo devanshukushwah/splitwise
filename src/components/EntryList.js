@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import Loader from "./Loader";
+import { AppConstants } from "@/common/AppConstants";
 
 export default function EntryList() {
   const [open, setOpen] = useState(false);
@@ -40,15 +41,18 @@ export default function EntryList() {
   };
 
   const stopAddEntryLoading = () => {
-    setAddEntryLoading(false);
-    handleClose();
+    setTimeout(() => {
+      setAddEntryLoading(false);
+      handleClose();
+    }, AppConstants.TIME_TO_STOP_BUTTON_LOADING);
   };
 
   const handleAddEntry = () => {
     if (entryName.trim() === "") return;
     startAddEntryLoading();
+    const entry = { title: entryName.trim() };
     api
-      .post(HttpUrlConfig.postEntryUrl(), { title: entryName.trim() })
+      .post(HttpUrlConfig.postEntryUrl(), entry)
       .then((response) => {
         setEntries([{ ...entry, _id: response?.data?.entry_id }, ...entries]);
         stopAddEntryLoading();
