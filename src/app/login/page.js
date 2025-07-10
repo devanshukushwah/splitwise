@@ -110,7 +110,7 @@ export default function LoginPage() {
               Login
             </Button>
             <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-              Don't have an account?&nbsp;
+              Don&apos;t have an account?&nbsp;
               <a
                 href="/signup"
                 style={{ color: "#1976d2", textDecoration: "none" }}
