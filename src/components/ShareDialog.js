@@ -108,12 +108,18 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          px: 3,
+          py: 2,
+          borderBottom: 1,
+          borderColor: "divider",
         }}
       >
-        Share
+        <Typography variant="h6" fontWeight={600}>
+          Share Entry
+        </Typography>
         <Button
           onClick={handleClose}
-          sx={{ minWidth: 0, padding: 0, color: "grey.600" }}
+          sx={{ minWidth: 0, color: "grey.600" }}
           aria-label="close"
         >
           <CloseIcon />
@@ -121,53 +127,62 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
       </DialogTitle>
 
       <DialogContent>
-        <Stack
-          direction="row"
-          gap={1}
-          alignItems={emailError ? "center" : "flex-end"}
-        >
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Email"
-            fullWidth
-            variant="standard"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              if (emailError) setEmailError("");
-            }}
-            placeholder="Enter email"
-            error={!!emailError}
-            helperText={emailError}
-          />
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            startIcon={<AddIcon />}
-          >
-            Add
-          </Button>
-        </Stack>
-        <Stack direction="row" gap={1} mt={2} flexWrap="wrap">
-          {shares.map((share) => (
-            <Box key={share.email}>
-              <Tooltip
-                title={`Shared by ${share.created_by} on ${new Date(
-                  share.created_at
-                ).toLocaleDateString()}`}
-                arrow
-                enterDelay={500}
-                leaveDelay={200}
-              >
-                <Chip
-                  label={share.email}
-                  variant="outlined"
-                  onDelete={() => handleDelete(share)}
-                />
-              </Tooltip>
-            </Box>
-          ))}
+        <Stack spacing={2} sx={{ mt: 2 }}>
+          <Stack direction="row" spacing={2} alignItems="flex-end">
+            <TextField
+              autoFocus
+              label="Email"
+              fullWidth
+              variant="outlined"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (emailError) setEmailError("");
+              }}
+              placeholder="Enter email"
+              error={!!emailError}
+              helperText={emailError}
+              size="small"
+            />
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ height: 40, minWidth: 100 }}
+            >
+              Add
+            </Button>
+          </Stack>
+          <Divider />
+          <Typography variant="subtitle2" color="text.secondary" mb={1}>
+            Shared With
+          </Typography>
+          <Stack direction="row" spacing={1} flexWrap="wrap">
+            {shares.length === 0 ? (
+              <Typography variant="body2" color="text.disabled">
+                No shares yet.
+              </Typography>
+            ) : (
+              shares.map((share) => (
+                <Tooltip
+                  key={share.email}
+                  title={`Shared by ${share.created_by} on ${new Date(
+                    share.created_at
+                  ).toLocaleDateString()}`}
+                  arrow
+                  enterDelay={500}
+                  leaveDelay={200}
+                >
+                  <Chip
+                    label={share.email}
+                    variant="outlined"
+                    onDelete={() => handleDelete(share)}
+                    sx={{ mb: 1 }}
+                  />
+                </Tooltip>
+              ))
+            )}
+          </Stack>
         </Stack>
       </DialogContent>
     </Dialog>

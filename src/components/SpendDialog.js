@@ -11,8 +11,10 @@ import {
   MenuItem,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import React, { useEffect } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 
 const defaultValue = () => ({
   title: "",
@@ -69,8 +71,27 @@ function SpendDialog({
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ bgcolor: "#f5f5f5", fontWeight: 600 }}>
-        {item ? "Edit Spend" : "Add Spend"}
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 3,
+          py: 2,
+          borderBottom: 1,
+          borderColor: "divider",
+        }}
+      >
+        <Typography variant="h6" fontWeight={600}>
+          {item ? "Edit Spend" : "Add Spend"}
+        </Typography>
+        <Button
+          onClick={handleOnClose}
+          sx={{ minWidth: 0, color: "grey.600" }}
+          aria-label="close"
+        >
+          <CloseIcon />
+        </Button>
       </DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ mt: 3 }}>
@@ -156,7 +177,7 @@ function SpendDialog({
           />
         </Stack>
       </DialogContent>
-      <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
+      <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
         <Button onClick={handleOnClose} color="secondary">
           Cancel
         </Button>

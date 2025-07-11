@@ -13,8 +13,10 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Typography,
 } from "@mui/material";
 import React, { useState } from "react";
+import CloseIcon from "@mui/icons-material/Close";
 
 const AddPersonDialog = ({ open, onClose }) => {
   const [name, setName] = useState("");
@@ -31,10 +33,29 @@ const AddPersonDialog = ({ open, onClose }) => {
 
   return (
     <Dialog open={open} onClose={handleOnClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ bgcolor: "#f5f5f5", fontWeight: 600 }}>
-        Add New Person
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          px: 3,
+          py: 2,
+          borderBottom: 1,
+          borderColor: "divider",
+        }}
+      >
+        <Typography variant="h6" fontWeight={600}>
+          Add New Person
+        </Typography>
+        <Button
+          onClick={handleOnClose}
+          sx={{ minWidth: 0, color: "grey.600" }}
+          aria-label="close"
+        >
+          <CloseIcon />
+        </Button>
       </DialogTitle>
-      <DialogContent sx={{ pt: 2 }}>
+      <DialogContent sx={{ mt: 2 }}>
         <Box display="flex" flexDirection="column" gap={2}>
           <TextField
             autoFocus
@@ -51,7 +72,7 @@ const AddPersonDialog = ({ open, onClose }) => {
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
+      <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
         <Button onClick={handleOnClose} color="secondary" variant="outlined">
           Cancel
         </Button>
