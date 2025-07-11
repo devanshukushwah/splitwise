@@ -190,7 +190,7 @@ const SpendTrackerPage = ({ entry_id }) => {
 
   return (
     <Box p={4}>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={2} mb={3}>
         <Button
           variant="contained"
           onClick={handleOpenAddPerson}
@@ -237,29 +237,30 @@ const SpendTrackerPage = ({ entry_id }) => {
         entry_id={entry_id}
       />
 
-      <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-        <Table>
+      <TableContainer component={Paper} sx={{ marginTop: 4, boxShadow: 3 }}>
+        <Table sx={{ minWidth: 700 }}>
           <TableHead>
-            <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Spend Amount</TableCell>
-              <TableCell>Spend By</TableCell>
-              <TableCell>Spend For</TableCell>
-              <TableCell>Time</TableCell>
+            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell sx={{ fontWeight: "bold" }}>Title</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Amount (₹)</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Paid By</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Paid For</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }} align="center">
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {spends.map((spend, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleEditOpen(spend._id)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  {spend.title}
-                </TableCell>
+              <TableRow
+                key={index}
+                sx={{
+                  "&:hover": { backgroundColor: "#fafafa" },
+                  transition: "background 0.2s",
+                }}
+              >
+                <TableCell>{spend.title}</TableCell>
                 <TableCell>₹ {spend.amount}</TableCell>
                 <TableCell>{peopleMap[spend.spend_by] || "None"}</TableCell>
                 <TableCell>
@@ -274,11 +275,21 @@ const SpendTrackerPage = ({ entry_id }) => {
                     minute: "2-digit",
                   })}
                 </TableCell>
+                <TableCell align="center">
+                  <IconButton
+                    aria-label="edit"
+                    onClick={() => handleEditOpen(spend._id)}
+                    size="small"
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
+                </TableCell>
               </TableRow>
             ))}
             {spends.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={6} align="center">
                   No spend data yet.
                 </TableCell>
               </TableRow>
