@@ -164,7 +164,8 @@ function SpendDialog({
           onClick={handleSubmit}
           variant="contained"
           color="primary"
-          disabled={loading}
+          loading={loading}
+          disabled={!spend?.title}
         >
           {item ? "Save Changes" : "Add Spend"}
         </Button>

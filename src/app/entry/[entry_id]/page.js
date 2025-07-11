@@ -83,7 +83,7 @@ const SpendTrackerPage = ({ entry_id }) => {
     setSpendLoading(true);
   };
 
-  const stopSpendLoading = ({ callback, timeout }) => {
+  const stopSpendLoading = ({ callback = () => {}, timeout = null } = {}) => {
     setTimeout(() => {
       setSpendLoading(false);
       if (typeof callback === "function") {
@@ -94,14 +94,19 @@ const SpendTrackerPage = ({ entry_id }) => {
 
   const handleAddSpend = (spend) => {
     startSpendLoading();
-    api.post(HttpUrlConfig.postSpendUrl(entry_id), spend).then((response) => {
-      const newSpends = [
-        ...spends,
-        { ...spend, _id: response.data.data.spend_id },
-      ];
-      setSpends(newSpends);
-      stopSpendLoading({ callback: () => handleClose() });
-    });
+    api
+      .post(HttpUrlConfig.postSpendUrl(entry_id), spend)
+      .then((response) => {
+        const newSpends = [
+          ...spends,
+          { ...spend, _id: response.data.data.spend_id },
+        ];
+        setSpends(newSpends);
+        stopSpendLoading({ callback: () => handleClose() });
+      })
+      .catch((error) => {
+        stopSpendLoading();
+      });
   };
 
   const handleEditSpend = (spend) => {
@@ -121,7 +126,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         });
       })
       .catch((error) => {
-        console.error("Error updating spend:", error);
+        stopSpendLoading();
       });
   };
 

@@ -30,23 +30,37 @@ const AddPersonDialog = ({ open, onClose }) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose}>
-      <DialogTitle>Add New Person</DialogTitle>
-      <DialogContent>
-        <TextField
-          autoFocus
-          margin="dense"
-          label="Person Name"
-          fullWidth
-          variant="standard"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Enter person's name"
-        />
+    <Dialog open={open} onClose={handleOnClose} maxWidth="xs" fullWidth>
+      <DialogTitle sx={{ bgcolor: "#f5f5f5", fontWeight: 600 }}>
+        Add New Person
+      </DialogTitle>
+      <DialogContent sx={{ pt: 2 }}>
+        <Box display="flex" flexDirection="column" gap={2}>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Person Name"
+            fullWidth
+            variant="outlined"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter person's name"
+            InputProps={{
+              sx: { bgcolor: "#fafafa" },
+            }}
+          />
+        </Box>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleOnClose}>Cancel</Button>
-        <Button onClick={handleAddPerson} variant="contained">
+      <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
+        <Button onClick={handleOnClose} color="secondary" variant="outlined">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleAddPerson}
+          variant="contained"
+          color="primary"
+          disabled={!name.trim()}
+        >
           Add
         </Button>
       </DialogActions>
