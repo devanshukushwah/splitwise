@@ -49,6 +49,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
+  const [spendLoading, setSpendLoading] = useState(false);
 
   useEffect(() => {
     let peopleMap = {};
@@ -78,28 +79,46 @@ const SpendTrackerPage = ({ entry_id }) => {
     setEditDialog(false);
   };
 
+  const startSpendLoading = () => {
+    setSpendLoading(true);
+  };
+
+  const stopSpendLoading = ({ callback, timeout }) => {
+    setTimeout(() => {
+      setSpendLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
+  };
+
   const handleAddSpend = (spend) => {
+    startSpendLoading();
     api.post(HttpUrlConfig.postSpendUrl(entry_id), spend).then((response) => {
-      handleClose();
       const newSpends = [
         ...spends,
         { ...spend, _id: response.data.data.spend_id },
       ];
       setSpends(newSpends);
+      stopSpendLoading({ callback: () => handleClose() });
     });
   };
 
   const handleEditSpend = (spend) => {
+    startSpendLoading();
     api
       .put(HttpUrlConfig.putSpendsUrl(entry_id, spend._id), spend)
       .then((response) => {
-        console.log("Spend updated successfully:", response.data);
         const updatedSpends = spends.map((item) =>
           item._id === spend._id ? { ...spend } : item
         );
         setSpends(updatedSpends);
-        setEditDialog(false);
-        setEditSpend(null);
+        stopSpendLoading({
+          callback: () => {
+            setEditDialog(false);
+            setEditSpend(null);
+          },
+        });
       })
       .catch((error) => {
         console.error("Error updating spend:", error);
@@ -202,6 +221,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         people={people}
         onClose={handleClose}
         onSubmit={handleAddSpend}
+        loading={spendLoading}
       />
       <SpendDialog
         open={editDialog}
@@ -209,6 +229,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         onClose={handleEditClose}
         onSubmit={handleEditSpend}
         item={editSpend}
+        loading={spendLoading}
       />
       <ShareDialog
         open={shareDialog}

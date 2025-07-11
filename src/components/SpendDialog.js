@@ -22,7 +22,14 @@ const defaultValue = () => ({
   created_at: getCurrentUTCDateTimeLocal(),
 });
 
-function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
+function SpendDialog({
+  open,
+  people,
+  onClose,
+  onSubmit,
+  loading,
+  item = null,
+}) {
   const [spend, setSpend] = React.useState(null);
 
   const handleChange = (e) => {
@@ -62,7 +69,7 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
         <DialogTitle>{item ? "Edit" : "Add"} Spend</DialogTitle>
         <DialogContent>
           <TextField
@@ -151,7 +158,7 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleOnClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
+          <Button onClick={handleSubmit} variant="contained" loading={loading}>
             {item ? "Edit" : "Add"}
           </Button>
         </DialogActions>
