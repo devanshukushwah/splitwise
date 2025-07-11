@@ -189,7 +189,7 @@ const SpendTrackerPage = ({ entry_id }) => {
           Add Spend
         </Button>
         <Button
-          variant="contained"
+          variant="outlined"
           startIcon={<ShareIcon />}
           onClick={() => setShareDialog(true)}
         >
@@ -245,7 +245,13 @@ const SpendTrackerPage = ({ entry_id }) => {
                   {getPersonNames(spend.spend_for) || "None"}
                 </TableCell>
                 <TableCell>
-                  {new Date(spend.created_at).toLocaleString()}
+                  {new Date(spend.created_at).toLocaleString(undefined, {
+                    year: "2-digit",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </TableCell>
               </TableRow>
             ))}
