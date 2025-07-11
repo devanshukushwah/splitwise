@@ -67,3 +67,40 @@ export const POST = withAuth(async (request, { params }) => {
     });
   }
 });
+
+export const DELETE = withAuth(async (request, { params }) => {
+  const client = await clientPromise;
+  const db = client.db();
+  const collection = db.collection(AppConstants.ENTRIES);
+
+  const data = await request.json();
+  const { email } = data;
+  const { entry_id } = params;
+
+  if (!email || !entry_id) {
+    return new Response(JSON.stringify({ error: "invalid data" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const result = await collection.updateOne(
+    { _id: new ObjectId(entry_id) },
+    { $pull: { shares: { email: email.toLowerCase() } } }
+  );
+
+  if (result.modifiedCount > 0) {
+    return new Response(
+      JSON.stringify({ success: true, message: "share deleted" }),
+      {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
+  } else {
+    return new Response(JSON.stringify({ error: "failed to delete share" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+});

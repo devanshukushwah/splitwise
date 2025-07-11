@@ -49,7 +49,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
-  const [shares, setShares] = useState([]);
+  const [spendLoading, setSpendLoading] = useState(false);
 
   useEffect(() => {
     let peopleMap = {};
@@ -79,28 +79,46 @@ const SpendTrackerPage = ({ entry_id }) => {
     setEditDialog(false);
   };
 
+  const startSpendLoading = () => {
+    setSpendLoading(true);
+  };
+
+  const stopSpendLoading = ({ callback, timeout }) => {
+    setTimeout(() => {
+      setSpendLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
+  };
+
   const handleAddSpend = (spend) => {
+    startSpendLoading();
     api.post(HttpUrlConfig.postSpendUrl(entry_id), spend).then((response) => {
-      handleClose();
       const newSpends = [
         ...spends,
         { ...spend, _id: response.data.data.spend_id },
       ];
       setSpends(newSpends);
+      stopSpendLoading({ callback: () => handleClose() });
     });
   };
 
   const handleEditSpend = (spend) => {
+    startSpendLoading();
     api
       .put(HttpUrlConfig.putSpendsUrl(entry_id, spend._id), spend)
       .then((response) => {
-        console.log("Spend updated successfully:", response.data);
         const updatedSpends = spends.map((item) =>
           item._id === spend._id ? { ...spend } : item
         );
         setSpends(updatedSpends);
-        setEditDialog(false);
-        setEditSpend(null);
+        stopSpendLoading({
+          callback: () => {
+            setEditDialog(false);
+            setEditSpend(null);
+          },
+        });
       })
       .catch((error) => {
         console.error("Error updating spend:", error);
@@ -164,40 +182,15 @@ const SpendTrackerPage = ({ entry_id }) => {
   useEffect(() => {
     fetchSpends();
     fetchPeople();
-    fetchShares();
   }, []);
-
-  const fetchShares = async () => {
-    api
-      .get(HttpUrlConfig.getSharesUrl(entry_id))
-      .then((response) => {
-        setShares(response?.data?.data?.shares || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
-  };
 
   const handleShareClose = () => {
     setShareDialog(false);
   };
 
-  const handleShareSubmit = (email) => {
-    api
-      .post(HttpUrlConfig.postSharesUrl(entry_id), email)
-      .then((response) => {
-        if (response?.data?.success) {
-          fetchShares();
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
-  };
-
   return (
     <Box p={4}>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={2} mb={3}>
         <Button
           variant="contained"
           onClick={handleOpenAddPerson}
@@ -215,7 +208,7 @@ const SpendTrackerPage = ({ entry_id }) => {
           Add Spend
         </Button>
         <Button
-          variant="contained"
+          variant="outlined"
           startIcon={<ShareIcon />}
           onClick={() => setShareDialog(true)}
         >
@@ -228,6 +221,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         people={people}
         onClose={handleClose}
         onSubmit={handleAddSpend}
+        loading={spendLoading}
       />
       <SpendDialog
         open={editDialog}
@@ -235,50 +229,67 @@ const SpendTrackerPage = ({ entry_id }) => {
         onClose={handleEditClose}
         onSubmit={handleEditSpend}
         item={editSpend}
+        loading={spendLoading}
       />
       <ShareDialog
         open={shareDialog}
         onClose={handleShareClose}
-        onSubmit={handleShareSubmit}
-        item={shares}
+        entry_id={entry_id}
       />
 
-      <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-        <Table>
+      <TableContainer component={Paper} sx={{ marginTop: 4, boxShadow: 3 }}>
+        <Table sx={{ minWidth: 700 }}>
           <TableHead>
-            <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Spend Amount</TableCell>
-              <TableCell>Spend By</TableCell>
-              <TableCell>Spend For</TableCell>
-              <TableCell>Time</TableCell>
+            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
+              <TableCell sx={{ fontWeight: "bold" }}>Title</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Amount (₹)</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Paid By</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Paid For</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
+              <TableCell sx={{ fontWeight: "bold" }} align="center">
+                Actions
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {spends.map((spend, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleEditOpen(spend._id)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  {spend.title}
-                </TableCell>
+              <TableRow
+                key={index}
+                sx={{
+                  "&:hover": { backgroundColor: "#fafafa" },
+                  transition: "background 0.2s",
+                }}
+              >
+                <TableCell>{spend.title}</TableCell>
                 <TableCell>₹ {spend.amount}</TableCell>
                 <TableCell>{peopleMap[spend.spend_by] || "None"}</TableCell>
                 <TableCell>
                   {getPersonNames(spend.spend_for) || "None"}
                 </TableCell>
                 <TableCell>
-                  {new Date(spend.created_at).toLocaleString()}
+                  {new Date(spend.created_at).toLocaleString(undefined, {
+                    year: "2-digit",
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </TableCell>
+                <TableCell align="center">
+                  <IconButton
+                    aria-label="edit"
+                    onClick={() => handleEditOpen(spend._id)}
+                    size="small"
+                    color="primary"
+                  >
+                    <EditIcon />
+                  </IconButton>
                 </TableCell>
               </TableRow>
             ))}
             {spends.length === 0 && (
               <TableRow>
-                <TableCell colSpan={4} align="center">
+                <TableCell colSpan={6} align="center">
                   No spend data yet.
                 </TableCell>
               </TableRow>

@@ -9,6 +9,7 @@ import {
   DialogTitle,
   ListItemText,
   MenuItem,
+  Stack,
   TextField,
 } from "@mui/material";
 import React, { useEffect } from "react";
@@ -21,7 +22,14 @@ const defaultValue = () => ({
   created_at: getCurrentUTCDateTimeLocal(),
 });
 
-function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
+function SpendDialog({
+  open,
+  people,
+  onClose,
+  onSubmit,
+  loading,
+  item = null,
+}) {
   const [spend, setSpend] = React.useState(null);
 
   const handleChange = (e) => {
@@ -53,98 +61,115 @@ function SpendDialog({ open, people, onClose, onSubmit, item = null }) {
     }
   }, [item]);
 
+  // Method to select all people for spend_for
+  const handleSelectAll = () => {
+    const allIds = people.map((person) => person._id);
+    setSpend({ ...spend, spend_for: allIds });
+  };
+
   return (
-    <>
-      <Dialog open={open} onClose={onClose}>
-        <DialogTitle>{item ? "Edit" : "Add"} Spend</DialogTitle>
-        <DialogContent>
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ bgcolor: "#f5f5f5", fontWeight: 600 }}>
+        {item ? "Edit Spend" : "Add Spend"}
+      </DialogTitle>
+      <DialogContent>
+        <Stack spacing={2} sx={{ mt: 3 }}>
           <TextField
-            margin="dense"
             label="Title"
             name="title"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={spend?.title}
             onChange={handleChange}
+            autoFocus
           />
           <TextField
-            margin="dense"
-            label="Spend Amount"
+            label="Amount"
             name="amount"
             type="number"
             fullWidth
-            variant="standard"
+            variant="outlined"
             value={spend?.amount}
             onChange={handleChange}
+            InputProps={{ inputProps: { min: 0 } }}
           />
           <TextField
-            margin="dense"
             label="Spend By"
             name="spend_by"
             fullWidth
             select
-            variant="standard"
+            variant="outlined"
             value={spend?.spend_by}
             onChange={handleChange}
           >
-            {people.map((person, idx) => (
-              <MenuItem key={idx} value={person._id}>
-                {person.name}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            margin="dense"
-            label="Spend For"
-            name="spend_for"
-            fullWidth
-            select
-            SelectProps={{
-              multiple: true,
-              renderValue: (selected) =>
-                people
-                  .filter((p) => selected.includes(p._id))
-                  .map((p) => p.name)
-                  .join(", "),
-            }}
-            variant="standard"
-            value={spend?.spend_for || []}
-            onChange={(e) => {
-              const value = Array.isArray(e.target.value)
-                ? e.target.value
-                : [e.target.value];
-              setSpend({ ...spend, spend_for: value });
-            }}
-          >
-            {people.map((person, idx) => (
-              <MenuItem key={idx} value={person._id}>
-                <Checkbox
-                  checked={spend?.spend_for?.includes(person._id) || false}
-                />
+            {people.map((person) => (
+              <MenuItem key={person._id} value={person._id}>
                 <ListItemText primary={person.name} />
               </MenuItem>
             ))}
           </TextField>
+          <Stack direction="row" spacing={1}>
+            <TextField
+              label="Spend For"
+              name="spend_for"
+              fullWidth
+              select
+              SelectProps={{
+                multiple: true,
+                renderValue: (selected) =>
+                  people
+                    .filter((p) => selected.includes(p._id))
+                    .map((p) => p.name)
+                    .join(", "),
+              }}
+              variant="outlined"
+              value={spend?.spend_for || []}
+              onChange={(e) => {
+                const value = Array.isArray(e.target.value)
+                  ? e.target.value
+                  : [e.target.value];
+                setSpend({ ...spend, spend_for: value });
+              }}
+            >
+              {people.map((person) => (
+                <MenuItem key={person._id} value={person._id}>
+                  <Checkbox
+                    checked={spend?.spend_for?.includes(person._id) || false}
+                  />
+                  <ListItemText primary={person.name} />
+                </MenuItem>
+              ))}
+            </TextField>
+            <Button variant="outlined" onClick={handleSelectAll}>
+              All
+            </Button>
+          </Stack>
           <TextField
-            margin="dense"
             label="Time"
             name="created_at"
             type="datetime-local"
             fullWidth
-            variant="standard"
+            variant="outlined"
             InputLabelProps={{ shrink: true }}
             value={spend?.created_at}
             onChange={handleChange}
           />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleOnClose}>Cancel</Button>
-          <Button onClick={handleSubmit} variant="contained">
-            {item ? "Edit" : "Add"}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+        </Stack>
+      </DialogContent>
+      <DialogActions sx={{ bgcolor: "#f5f5f5" }}>
+        <Button onClick={handleOnClose} color="secondary">
+          Cancel
+        </Button>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          color="primary"
+          disabled={loading}
+        >
+          {item ? "Save Changes" : "Add Spend"}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 }
 
