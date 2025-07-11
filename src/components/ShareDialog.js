@@ -15,29 +15,25 @@ import {
   Paper,
   Stack,
   Typography,
+  Chip,
+  Divider,
+  Tooltip,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import AddIcon from "@mui/icons-material/Add";
+import { SpaceBar } from "@mui/icons-material";
+import CloseIcon from "@mui/icons-material/Close";
+import api from "@/lib/axios";
+import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 
-const ShareDialog = ({ open, onClose, onSubmit, item = null }) => {
+const ShareDialog = ({ open, onClose, entry_id }) => {
   const [shares, setShares] = useState([]);
   const [email, setEmail] = useState("");
-
-  // const handleSubmit = () => {
-  //   onSubmit({ email });
-  //   setEmails("");
-  // };
 
   const handleClose = () => {
     onClose();
     setEmail("");
   };
-
-  useEffect(() => {
-    if (item) {
-      setShares(item);
-    }
-  }, [item]);
 
   // Simple email validation regex
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -56,13 +52,73 @@ const ShareDialog = ({ open, onClose, onSubmit, item = null }) => {
     }
 
     setEmailError("");
-    onSubmit({ email });
+    handleShareSubmit({ email });
     setEmail("");
   };
 
+  const handleShareSubmit = (email) => {
+    api
+      .post(HttpUrlConfig.postSharesUrl(entry_id), email)
+      .then((response) => {
+        if (response?.data?.success) {
+          fetchShares();
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching people:", error);
+      });
+  };
+
+  const fetchShares = async () => {
+    api
+      .get(HttpUrlConfig.getSharesUrl(entry_id))
+      .then((response) => {
+        setShares(response?.data?.data?.shares || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching people:", error);
+      });
+  };
+
+  const handleDelete = (share) => {
+    api
+      .delete(HttpUrlConfig.deleteSharesUrl(entry_id), {
+        data: { email: share.email },
+      })
+      .then((response) => {
+        if (response?.data?.success) {
+          setShares(shares.filter((s) => s.email !== share.email));
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting share:", error);
+      });
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchShares();
+    }
+  }, [open]);
+
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
-      <DialogTitle>Share</DialogTitle>
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        Share
+        <Button
+          onClick={handleClose}
+          sx={{ minWidth: 0, padding: 0, color: "grey.600" }}
+          aria-label="close"
+        >
+          <CloseIcon />
+        </Button>
+      </DialogTitle>
 
       <DialogContent>
         <Stack
@@ -93,11 +149,27 @@ const ShareDialog = ({ open, onClose, onSubmit, item = null }) => {
             Add
           </Button>
         </Stack>
-        <Typography>{shares.map((share) => share.email).join(", ")}</Typography>
+        <Stack direction="row" gap={1} mt={2} flexWrap="wrap">
+          {shares.map((share) => (
+            <Box key={share.email}>
+              <Tooltip
+                title={`Shared by ${share.created_by} on ${new Date(
+                  share.created_at
+                ).toLocaleDateString()}`}
+                arrow
+                enterDelay={500}
+                leaveDelay={200}
+              >
+                <Chip
+                  label={share.email}
+                  variant="outlined"
+                  onDelete={() => handleDelete(share)}
+                />
+              </Tooltip>
+            </Box>
+          ))}
+        </Stack>
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Cancel</Button>
-      </DialogActions>
     </Dialog>
   );
 };

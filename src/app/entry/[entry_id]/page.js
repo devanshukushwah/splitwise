@@ -49,7 +49,6 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
-  const [shares, setShares] = useState([]);
 
   useEffect(() => {
     let peopleMap = {};
@@ -164,35 +163,10 @@ const SpendTrackerPage = ({ entry_id }) => {
   useEffect(() => {
     fetchSpends();
     fetchPeople();
-    fetchShares();
   }, []);
-
-  const fetchShares = async () => {
-    api
-      .get(HttpUrlConfig.getSharesUrl(entry_id))
-      .then((response) => {
-        setShares(response?.data?.data?.shares || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
-  };
 
   const handleShareClose = () => {
     setShareDialog(false);
-  };
-
-  const handleShareSubmit = (email) => {
-    api
-      .post(HttpUrlConfig.postSharesUrl(entry_id), email)
-      .then((response) => {
-        if (response?.data?.success) {
-          fetchShares();
-        }
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
   };
 
   return (
@@ -239,8 +213,7 @@ const SpendTrackerPage = ({ entry_id }) => {
       <ShareDialog
         open={shareDialog}
         onClose={handleShareClose}
-        onSubmit={handleShareSubmit}
-        item={shares}
+        entry_id={entry_id}
       />
 
       <TableContainer component={Paper} sx={{ marginTop: 4 }}>
