@@ -118,7 +118,7 @@ export default function EntryList() {
             }}
           >
             <Typography variant="h6" fontWeight={600}>
-              Share Entry
+              Add Entry
             </Typography>
             <Button
               onClick={handleClose}
