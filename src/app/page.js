@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import AddPersonDialog from "../components/AddPersonDialog";
 import { getCurrentUTCDateTimeLocal } from "../utils/DateUtils";
 import {
   Box,
@@ -39,6 +38,7 @@ import { AppConstants } from "../common/AppConstants";
 import SpendDialog from "@/components/SpendDialog";
 import Header from "@/components/Header";
 import SpendTable from "@/components/SpendTable";
+import PeopleDialog from "@/components/PeopleDialog";
 
 const SpendTrackerPage = () => {
   const [open, setOpen] = useState(false);
@@ -129,7 +129,7 @@ const SpendTrackerPage = () => {
 
   return (
     <>
-      <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
+      <PeopleDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
       <SpendDialog
         open={open}
         people={people}
