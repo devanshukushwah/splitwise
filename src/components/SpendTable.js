@@ -11,19 +11,24 @@ import {
 import React, { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 
+const doPeopleMap = (people) => {
+  let peopleMap = {};
+  for (let obj of people) {
+    peopleMap[obj._id] = obj.name;
+  }
+
+  return peopleMap;
+};
+
 function SpendTable({ spends, people, onEdit }) {
-  const [peopleMap, setPeopleMap] = useState({});
+  const [peopleMap, setPeopleMap] = useState(doPeopleMap(people || []));
 
   const getPersonNames = (spendFor) => {
     return spendFor?.map((id) => peopleMap[id] || "Unknown").join(", ");
   };
 
   useEffect(() => {
-    let peopleMap = {};
-    for (let obj of people) {
-      peopleMap[obj._id] = obj.name;
-    }
-    setPeopleMap(peopleMap);
+    setPeopleMap(doPeopleMap(people || []));
   }, [people]);
 
   return (
@@ -75,7 +80,7 @@ function SpendTable({ spends, people, onEdit }) {
               </TableCell>
             </TableRow>
           ))}
-          {spends.length === 0 && (
+          {(spends.length === 0 || people.length === 0) && (
             <TableRow>
               <TableCell colSpan={6} align="center">
                 No spend data yet.
