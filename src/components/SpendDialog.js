@@ -103,6 +103,7 @@ function SpendDialog({
             value={spend?.title}
             onChange={handleChange}
             autoFocus
+            size="small"
           />
           <TextField
             label="Amount"
@@ -113,6 +114,7 @@ function SpendDialog({
             value={spend?.amount}
             onChange={handleChange}
             InputProps={{ inputProps: { min: 0 } }}
+            size="small"
           />
           <TextField
             label="Spend By"
@@ -122,6 +124,7 @@ function SpendDialog({
             variant="outlined"
             value={spend?.spend_by}
             onChange={handleChange}
+            size="small"
           >
             {people.map((person) => (
               <MenuItem key={person._id} value={person._id}>
@@ -131,6 +134,7 @@ function SpendDialog({
           </TextField>
           <Stack direction="row" spacing={1}>
             <TextField
+              size="small"
               label="Spend For"
               name="spend_for"
               fullWidth
@@ -166,6 +170,7 @@ function SpendDialog({
             </Button>
           </Stack>
           <TextField
+            size="small"
             label="Time"
             name="created_at"
             type="datetime-local"

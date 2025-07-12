@@ -3,7 +3,6 @@
 import Header from "@/components/Header";
 import { use } from "react";
 import React, { useEffect, useState } from "react";
-import AddPersonDialog from "@/components/AddPersonDialog";
 import { getCurrentUTCDateTimeLocal } from "@/utils/DateUtils";
 import {
   Box,
@@ -40,6 +39,8 @@ import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
 import ShareDialog from "@/components/ShareDialog";
 import SpendTable from "@/components/SpendTable";
+import { People } from "@mui/icons-material";
+import PeopleDialog from "@/components/PeopleDialog";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
@@ -135,23 +136,9 @@ const SpendTrackerPage = ({ entry_id }) => {
     setOpenPersonDialog(true);
   };
 
-  const handleCloseAddPerson = async (person) => {
+  const handleCloseAddPerson = async (people) => {
     setOpenPersonDialog(false);
-    if (person) {
-      api
-        .post(HttpUrlConfig.postPeopleUrl(entry_id), person)
-        .then((response) => {
-          const newPerson = {
-            _id: response?.data?.data?.person_id,
-            name: person.name,
-          };
-
-          setPeople([...people, newPerson]);
-        })
-        .catch((error) => {
-          console.error("Error fetching people:", error);
-        });
-    }
+    setPeople(people);
   };
 
   useEffect(() => {
@@ -196,7 +183,11 @@ const SpendTrackerPage = ({ entry_id }) => {
 
   return (
     <>
-      <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
+      <PeopleDialog
+        open={openPersonDialog}
+        onClose={handleCloseAddPerson}
+        entry_id={entry_id}
+      />
       <SpendDialog
         open={open}
         people={people}

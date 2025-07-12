@@ -25,84 +25,99 @@ import { SpaceBar } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
+import { AppConstants } from "@/common/AppConstants";
 
-const ShareDialog = ({ open, onClose, entry_id }) => {
-  const [shares, setShares] = useState([]);
-  const [email, setEmail] = useState("");
+const PeopleDialog = ({ open, onClose, entry_id }) => {
+  const [people, setPeople] = useState([]);
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+  const [addPersonLoading, setAddPersonLoading] = useState(false);
+
+  const startAddPersonLoading = () => {
+    setAddPersonLoading(true);
+  };
+
+  const stopAddPersonLoading = ({
+    callback = () => {},
+    timeout = null,
+  } = {}) => {
+    setTimeout(() => {
+      setAddPersonLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING);
+  };
 
   const handleClose = () => {
-    onClose();
-    setEmail("");
+    onClose(people);
+    setName("");
   };
-
-  // Simple email validation regex
-  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const [emailError, setEmailError] = useState("");
 
   const handleSubmit = () => {
-    if (!isValidEmail(email)) {
-      setEmailError("Please enter a valid email address.");
+    if (people.some((person) => person.name === name)) {
+      setError("This name is already added.");
       return;
     }
 
-    if (shares.some((share) => share.email === email)) {
-      setEmailError("This email is already added.");
-      return;
-    }
-
-    setEmailError("");
-    handleShareSubmit({ email });
-    setEmail("");
+    setError("");
+    handlePersonSubmit({ name });
+    setName("");
   };
 
-  const handleShareSubmit = (email) => {
+  const handlePersonSubmit = (person) => {
+    startAddPersonLoading();
     api
-      .post(HttpUrlConfig.postSharesUrl(entry_id), email)
+      .post(HttpUrlConfig.postPeopleUrl(entry_id), person)
       .then((response) => {
         if (response?.data?.success) {
-          fetchShares();
+          stopAddPersonLoading({
+            callback: () => {
+              const newPerson = response.data.data.person;
+              setPeople([...people, newPerson]);
+            },
+          });
         }
+        stopAddPersonLoading();
+      })
+      .catch((error) => {
+        console.error("Error fetching people:", error);
+        stopAddPersonLoading();
+      });
+  };
+
+  const fetchPeople = async () => {
+    api
+      .get(HttpUrlConfig.getPeopleUrl(entry_id))
+      .then((response) => {
+        setPeople(response?.data?.data?.people || []);
       })
       .catch((error) => {
         console.error("Error fetching people:", error);
       });
   };
 
-  const fetchShares = async () => {
+  const handleDelete = (person) => {
     api
-      .get(HttpUrlConfig.getSharesUrl(entry_id))
-      .then((response) => {
-        setShares(response?.data?.data?.shares || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
-  };
-
-  const handleDelete = (share) => {
-    api
-      .delete(HttpUrlConfig.deleteSharesUrl(entry_id), {
-        data: { email: share.email },
-      })
+      .delete(HttpUrlConfig.deletePeopleUrl(entry_id, person._id))
       .then((response) => {
         if (response?.data?.success) {
-          setShares(shares.filter((s) => s.email !== share.email));
+          setPeople(people.filter((item) => item._id !== person._id));
         }
       })
       .catch((error) => {
-        console.error("Error deleting share:", error);
+        console.error("Error deleting person:", error);
       });
   };
 
   useEffect(() => {
     if (open) {
-      fetchShares();
+      fetchPeople();
     }
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle
         sx={{
           display: "flex",
@@ -115,7 +130,7 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
         }}
       >
         <Typography variant="h6" fontWeight={600}>
-          Share Entry
+          Add Person
         </Typography>
         <Button
           onClick={handleClose}
@@ -131,17 +146,17 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
           <Stack direction="row" spacing={2} alignItems="flex-end">
             <TextField
               autoFocus
-              label="Email"
+              label="Name"
               fullWidth
               variant="outlined"
-              value={email}
+              value={name}
               onChange={(e) => {
-                setEmail(e.target.value);
-                if (emailError) setEmailError("");
+                setName(e.target.value);
+                if (error) setError("");
               }}
-              placeholder="Enter email"
-              error={!!emailError}
-              helperText={emailError}
+              placeholder="Enter person name"
+              error={!!error}
+              helperText={error}
               size="small"
             />
             <Button
@@ -149,34 +164,35 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
               variant="contained"
               startIcon={<AddIcon />}
               sx={{ height: 40, minWidth: 100 }}
+              loading={addPersonLoading}
             >
               Add
             </Button>
           </Stack>
           <Divider />
           <Typography variant="subtitle2" color="text.secondary" mb={1}>
-            Shared With
+            People List
           </Typography>
           <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-            {shares.length === 0 ? (
+            {people.length === 0 ? (
               <Typography variant="body2" color="text.disabled">
-                No shares yet.
+                No people yet.
               </Typography>
             ) : (
-              shares.map((share) => (
+              people.map((person) => (
                 <Tooltip
-                  key={share.email}
-                  title={`Shared by ${share.created_by} on ${new Date(
-                    share.created_at
+                  key={person.name}
+                  title={`Added by ${person.created_by} on ${new Date(
+                    person.created_at
                   ).toLocaleDateString()}`}
                   arrow
                   enterDelay={500}
                   leaveDelay={200}
                 >
                   <Chip
-                    label={share.email}
+                    label={person.name}
                     variant="outlined"
-                    onDelete={() => handleDelete(share)}
+                    onDelete={() => handleDelete(person)}
                   />
                 </Tooltip>
               ))
@@ -188,4 +204,4 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
   );
 };
 
-export default ShareDialog;
+export default PeopleDialog;
