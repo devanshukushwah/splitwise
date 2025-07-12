@@ -157,7 +157,20 @@ const Entries = ({ entries }) => {
                 alignItems="center"
                 justifyContent="space-between"
               >
-                <Typography variant="body1">{entry.title}</Typography>
+                <Box>
+                  <Typography variant="body1">{entry.title}</Typography>
+                  {entry.created_at && (
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(entry.created_at).toLocaleTimeString([], {
+                        year: "2-digit",
+                        month: "short",
+                        day: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </Typography>
+                  )}
+                </Box>
                 <Button
                   variant="outlined"
                   color="secondary"

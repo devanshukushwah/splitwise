@@ -39,6 +39,7 @@ import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
 import ShareDialog from "@/components/ShareDialog";
+import SpendTable from "@/components/SpendTable";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
@@ -194,32 +195,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   return (
-    <Box p={4}>
-      <Stack direction="row" spacing={2} mb={3}>
-        <Button
-          variant="contained"
-          onClick={handleOpenAddPerson}
-          startIcon={<PersonIcon />}
-        >
-          Add Person
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleOpen}
-          disabled={people.length === 0}
-          startIcon={<AddIcon />}
-          color="secondary"
-        >
-          Add Spend
-        </Button>
-        <Button
-          variant="outlined"
-          startIcon={<ShareIcon />}
-          onClick={() => setShareDialog(true)}
-        >
-          Share
-        </Button>
-      </Stack>
+    <>
       <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
       <SpendDialog
         open={open}
@@ -242,69 +218,37 @@ const SpendTrackerPage = ({ entry_id }) => {
         entry_id={entry_id}
       />
 
-      <TableContainer component={Paper} sx={{ marginTop: 4, boxShadow: 3 }}>
-        <Table sx={{ minWidth: 700 }}>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
-              <TableCell sx={{ fontWeight: "bold" }}>Title</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Amount (₹)</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Paid By</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Paid For</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
-              <TableCell sx={{ fontWeight: "bold" }} align="center">
-                Actions
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {spends.map((spend, index) => (
-              <TableRow
-                key={index}
-                sx={{
-                  "&:hover": { backgroundColor: "#fafafa" },
-                  transition: "background 0.2s",
-                }}
-              >
-                <TableCell>{spend.title}</TableCell>
-                <TableCell>₹ {spend.amount}</TableCell>
-                <TableCell>{peopleMap[spend.spend_by] || "None"}</TableCell>
-                <TableCell>
-                  {getPersonNames(spend.spend_for) || "None"}
-                </TableCell>
-                <TableCell>
-                  {new Date(spend.created_at).toLocaleString(undefined, {
-                    year: "2-digit",
-                    month: "short",
-                    day: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </TableCell>
-                <TableCell align="center">
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleEditOpen(spend._id)}
-                    size="small"
-                    color="primary"
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
-            {spends.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} align="center">
-                  No spend data yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Divider sx={{ margin: 2 }} />
-      <SpendResult data={report} people={people} />
-    </Box>
+      <Box p={4}>
+        <Stack direction="row" spacing={2} mb={3}>
+          <Button
+            variant="contained"
+            onClick={handleOpenAddPerson}
+            startIcon={<PersonIcon />}
+          >
+            Add Person
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleOpen}
+            disabled={people.length === 0}
+            startIcon={<AddIcon />}
+            color="secondary"
+          >
+            Add Spend
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ShareIcon />}
+            onClick={() => setShareDialog(true)}
+          >
+            Share
+          </Button>
+        </Stack>
+        <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />
+        <Divider sx={{ margin: 2 }} />
+        <SpendResult data={report} people={people} />
+      </Box>
+    </>
   );
 };
 

@@ -38,6 +38,7 @@ import {
 import { AppConstants } from "../common/AppConstants";
 import SpendDialog from "@/components/SpendDialog";
 import Header from "@/components/Header";
+import SpendTable from "@/components/SpendTable";
 
 const SpendTrackerPage = () => {
   const [open, setOpen] = useState(false);
@@ -89,7 +90,7 @@ const SpendTrackerPage = () => {
 
   const handleEditSpend = (form) => {
     const updatedSpends = spends.map((item) =>
-      item._id === form._id ? { ...form } : spend
+      item._id === form._id ? { ...form } : item
     );
     setSpends(updatedSpends);
     saveToLocalStorage(AppConstants.SPENDS, updatedSpends);
@@ -127,33 +128,7 @@ const SpendTrackerPage = () => {
   };
 
   return (
-    <Box p={4}>
-      <Stack direction="row" spacing={2}>
-        <Button
-          variant="contained"
-          onClick={handleOpenAddPerson}
-          startIcon={<PersonIcon />}
-        >
-          Add Person
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleOpen}
-          disabled={people.length === 0}
-          startIcon={<AddIcon />}
-          color="secondary"
-        >
-          Add Spend
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleReset}
-          startIcon={<RestartAltIcon />}
-          color="error"
-        >
-          Reset
-        </Button>
-      </Stack>
+    <>
       <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
       <SpendDialog
         open={open}
@@ -168,51 +143,38 @@ const SpendTrackerPage = () => {
         onSubmit={handleEditSpend}
         item={editSpend}
       />
-
-      <TableContainer component={Paper} sx={{ marginTop: 4 }}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Title</TableCell>
-              <TableCell>Spend Amount</TableCell>
-              <TableCell>Spend By</TableCell>
-              <TableCell>Spend For</TableCell>
-              <TableCell>Time</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {spends.map((spend, index) => (
-              <TableRow key={index}>
-                <TableCell>
-                  <IconButton
-                    aria-label="edit"
-                    onClick={() => handleEditOpen(spend.spend_id)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                  {spend.title}
-                </TableCell>
-                <TableCell>₹ {spend.amount}</TableCell>
-                <TableCell>{peopleMap[spend.spend_by]}</TableCell>
-                <TableCell>{getPersonNames(spend.spend_for)}</TableCell>
-                <TableCell>
-                  {new Date(spend.created_at).toLocaleString()}
-                </TableCell>
-              </TableRow>
-            ))}
-            {spends.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={4} align="center">
-                  No spend data yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-      <Divider sx={{ margin: 2 }} />
-      <SpendResult data={report} people={people} />
-    </Box>
+      <Box p={4}>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            onClick={handleOpenAddPerson}
+            startIcon={<PersonIcon />}
+          >
+            Add Person
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleOpen}
+            disabled={people.length === 0}
+            startIcon={<AddIcon />}
+            color="secondary"
+          >
+            Add Spend
+          </Button>
+          <Button
+            variant="contained"
+            onClick={handleReset}
+            startIcon={<RestartAltIcon />}
+            color="error"
+          >
+            Reset
+          </Button>
+        </Stack>
+        <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />
+        <Divider sx={{ margin: 2 }} />
+        <SpendResult data={report} people={people} />
+      </Box>
+    </>
   );
 };
 
