@@ -20,6 +20,7 @@ import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import Loader from "./Loader";
 import { AppConstants } from "@/common/AppConstants";
+import CloseIcon from "@mui/icons-material/Close";
 
 export default function EntryList() {
   const [open, setOpen] = useState(false);
@@ -54,7 +55,8 @@ export default function EntryList() {
     api
       .post(HttpUrlConfig.postEntryUrl(), entry)
       .then((response) => {
-        setEntries([{ ...entry, _id: response?.data?.entry_id }, ...entries]);
+        const addedEntry = response?.data?.data?.entry;
+        setEntries([addedEntry, ...entries]);
         stopAddEntryLoading();
       })
       .catch((error) => {
@@ -103,9 +105,31 @@ export default function EntryList() {
         {entriesLoading ? <Loader /> : <Entries entries={entries} />}
 
         {/* Dialog */}
-        <Dialog open={open} onClose={handleClose}>
-          <DialogTitle>Add New Entry</DialogTitle>
-          <DialogContent>
+        <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
+          <DialogTitle
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              px: 3,
+              py: 2,
+              borderBottom: 1,
+              borderColor: "divider",
+            }}
+          >
+            <Typography variant="h6" fontWeight={600}>
+              Share Entry
+            </Typography>
+            <Button
+              onClick={handleClose}
+              sx={{ minWidth: 0, color: "grey.600" }}
+              aria-label="close"
+            >
+              <CloseIcon />
+            </Button>
+          </DialogTitle>
+
+          <DialogContent sx={{ mt: 2 }}>
             <TextField
               autoFocus
               margin="dense"
@@ -115,7 +139,7 @@ export default function EntryList() {
               onChange={(e) => setEntryName(e.target.value)}
             />
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
             <Button onClick={handleClose} color="secondary">
               Cancel
             </Button>
@@ -124,6 +148,7 @@ export default function EntryList() {
               variant="contained"
               color="primary"
               loading={addEntryLoading}
+              disabled={entryName.trim() === ""}
             >
               Add
             </Button>
