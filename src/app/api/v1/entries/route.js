@@ -48,13 +48,15 @@ export const POST = withAuth(async (request) => {
     });
   }
 
-  const newEntry = { title, created_by: email, created_at: new Date() };
+  let newEntry = { title, created_by: email, created_at: new Date() };
   const result = await collection.insertOne(newEntry);
+
+  newEntry._id = result.insertedId;
 
   return new Response(
     JSON.stringify({
       success: true,
-      entry_id: result.insertedId,
+      data: { entry: newEntry },
       message: "Entry created successfully",
     }),
     {
