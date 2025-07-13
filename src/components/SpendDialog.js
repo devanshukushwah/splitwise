@@ -126,11 +126,13 @@ function SpendDialog({
             onChange={handleChange}
             size="small"
           >
-            {people.map((person) => (
-              <MenuItem key={person._id} value={person._id}>
-                <ListItemText primary={person.name} />
-              </MenuItem>
-            ))}
+            {people
+              ?.filter((item) => item?.isDeleted !== true)
+              ?.map((person) => (
+                <MenuItem key={person._id} value={person._id}>
+                  <ListItemText primary={person.name} />
+                </MenuItem>
+              ))}
           </TextField>
           <Stack direction="row" spacing={1}>
             <TextField
@@ -156,14 +158,16 @@ function SpendDialog({
                 setSpend({ ...spend, spend_for: value });
               }}
             >
-              {people.map((person) => (
-                <MenuItem key={person._id} value={person._id}>
-                  <Checkbox
-                    checked={spend?.spend_for?.includes(person._id) || false}
-                  />
-                  <ListItemText primary={person.name} />
-                </MenuItem>
-              ))}
+              {people
+                ?.filter((item) => item?.isDeleted !== true)
+                ?.map((person) => (
+                  <MenuItem key={person._id} value={person._id}>
+                    <Checkbox
+                      checked={spend?.spend_for?.includes(person._id) || false}
+                    />
+                    <ListItemText primary={person.name} />
+                  </MenuItem>
+                ))}
             </TextField>
             <Button variant="outlined" onClick={handleSelectAll}>
               All

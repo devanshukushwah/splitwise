@@ -19,9 +19,10 @@ export const DELETE = withAuth(async (request, { params }) => {
 
   const { email } = request.user;
 
-  const result = await collection.deleteOne({
-    _id: new ObjectId(person_id),
-  });
+  const result = await collection.updateOne(
+    { _id: new ObjectId(person_id) },
+    { $set: { isDeleted: true } }
+  );
 
   if (result.deletedCount === 0) {
     return new Response(JSON.stringify({ error: "person not found" }), {

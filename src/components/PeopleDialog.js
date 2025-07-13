@@ -55,8 +55,15 @@ const PeopleDialog = ({ open, onClose, entry_id }) => {
   };
 
   const handleSubmit = () => {
-    if (people.some((person) => person.name === name)) {
-      setError("This name is already added.");
+    const findPeople = people.find((person) => person.name === name);
+
+    if (findPeople?.isDeleted === true) {
+      setError("This name was added earlier");
+      return;
+    }
+
+    if (findPeople) {
+      setError("This name is already added");
       return;
     }
 
@@ -102,7 +109,13 @@ const PeopleDialog = ({ open, onClose, entry_id }) => {
       .delete(HttpUrlConfig.deletePeopleUrl(entry_id, person._id))
       .then((response) => {
         if (response?.data?.success) {
-          setPeople(people.filter((item) => item._id !== person._id));
+          const updatedPeople = people.map((item) => {
+            if (item._id === person._id) {
+              return { ...item, isDeleted: true };
+            }
+            return item;
+          });
+          setPeople(updatedPeople);
         }
       })
       .catch((error) => {
@@ -179,23 +192,25 @@ const PeopleDialog = ({ open, onClose, entry_id }) => {
                 No people yet.
               </Typography>
             ) : (
-              people.map((person) => (
-                <Tooltip
-                  key={person.name}
-                  title={`Added by ${person.created_by} on ${new Date(
-                    person.created_at
-                  ).toLocaleDateString()}`}
-                  arrow
-                  enterDelay={500}
-                  leaveDelay={200}
-                >
-                  <Chip
-                    label={person.name}
-                    variant="outlined"
-                    onDelete={() => handleDelete(person)}
-                  />
-                </Tooltip>
-              ))
+              people
+                ?.filter((item) => item?.isDeleted !== true)
+                ?.map((person) => (
+                  <Tooltip
+                    key={person.name}
+                    title={`Added by ${person.created_by} on ${new Date(
+                      person.created_at
+                    ).toLocaleDateString()}`}
+                    arrow
+                    enterDelay={500}
+                    leaveDelay={200}
+                  >
+                    <Chip
+                      label={person.name}
+                      variant="outlined"
+                      onDelete={() => handleDelete(person)}
+                    />
+                  </Tooltip>
+                ))
             )}
           </Stack>
         </Stack>
