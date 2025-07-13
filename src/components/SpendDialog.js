@@ -66,7 +66,9 @@ function SpendDialog({
 
   // Method to select all people for spend_for
   const handleSelectAll = () => {
-    const allIds = people.map((person) => person._id);
+    const allIds = people
+      .filter((item) => item?.isDeleted !== true)
+      .map((person) => person._id);
     setSpend({ ...spend, spend_for: allIds });
   };
 
