@@ -1,6 +1,8 @@
 import {
+  Chip,
   IconButton,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -23,10 +25,6 @@ const doPeopleMap = (people) => {
 function SpendTable({ spends, people, onEdit }) {
   const [peopleMap, setPeopleMap] = useState(doPeopleMap(people || []));
 
-  const getPersonNames = (spendFor) => {
-    return spendFor?.map((id) => peopleMap[id] || "Unknown").join(", ");
-  };
-
   useEffect(() => {
     setPeopleMap(doPeopleMap(people || []));
   }, [people]);
@@ -37,7 +35,7 @@ function SpendTable({ spends, people, onEdit }) {
         <TableHead>
           <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
             <TableCell sx={{ fontWeight: "bold" }}>Title</TableCell>
-            <TableCell sx={{ fontWeight: "bold" }}>Amount (₹)</TableCell>
+            <TableCell sx={{ fontWeight: "bold" }}>Amount</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Paid By</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Paid For</TableCell>
             <TableCell sx={{ fontWeight: "bold" }}>Time</TableCell>
@@ -57,8 +55,25 @@ function SpendTable({ spends, people, onEdit }) {
             >
               <TableCell>{spend.title}</TableCell>
               <TableCell>₹ {spend.amount}</TableCell>
-              <TableCell>{peopleMap[spend.spend_by] || "None"}</TableCell>
-              <TableCell>{getPersonNames(spend.spend_for) || "None"}</TableCell>
+              <TableCell>
+                <Chip
+                  label={peopleMap[spend.spend_by] || "Unknown"}
+                  variant="outlined"
+                  size="small"
+                />
+              </TableCell>
+              <TableCell>
+                <Stack direction="row" spacing={0.5}>
+                  {spend?.spend_for?.map((person_id) => (
+                    <Chip
+                      key={person_id}
+                      label={peopleMap[person_id] || "Unknown"}
+                      variant="outlined"
+                      size="small"
+                    />
+                  ))}
+                </Stack>
+              </TableCell>
               <TableCell>
                 {new Date(spend.created_at).toLocaleString(undefined, {
                   year: "2-digit",
@@ -80,7 +95,7 @@ function SpendTable({ spends, people, onEdit }) {
               </TableCell>
             </TableRow>
           ))}
-          {(spends.length === 0 || people.length === 0) && (
+          {(!people || spends.length === 0) && (
             <TableRow>
               <TableCell colSpan={6} align="center">
                 No spend data yet.
