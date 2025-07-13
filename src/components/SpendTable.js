@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
+import Currency from "./Currency";
 
 const doPeopleMap = (people) => {
   let peopleMap = {};
@@ -54,7 +55,9 @@ function SpendTable({ spends, people, onEdit }) {
               }}
             >
               <TableCell>{spend.title}</TableCell>
-              <TableCell>₹ {spend.amount}</TableCell>
+              <TableCell>
+                <Currency amount={spend.amount} />
+              </TableCell>
               <TableCell>
                 <Chip
                   label={peopleMap[spend.spend_by] || "Unknown"}
