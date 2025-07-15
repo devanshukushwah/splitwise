@@ -89,7 +89,7 @@ export default function EntryList() {
 
   return (
     <>
-      <Box sx={{ mt: 4 }}>
+      <Box>
         <Box
           display="flex"
           justifyContent="space-between"

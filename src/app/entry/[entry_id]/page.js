@@ -45,6 +45,7 @@ import PeopleDialog from "@/components/PeopleDialog";
 
 import { deletePeople, getPeople, postPeople } from "@/api/people";
 import { getSpends, postSpend, putSpend } from "@/api/spend";
+import Breadcrumb from "@/components/Breadcrumb";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
@@ -215,7 +216,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         entry_id={entry_id}
       />
 
-      <Box mt={4}>
+      <Box>
         <Stack direction="row" spacing={2} mb={3}>
           <Button
             variant="contained"
@@ -252,10 +253,25 @@ const SpendTrackerPage = ({ entry_id }) => {
 function Page({ params }) {
   const { entry_id } = use(params);
 
+  const breadCrumbList = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+    },
+    {
+      label: entry_id,
+      href: `/entry/${entry_id}`,
+      isText: true,
+    },
+  ];
+
   return (
     <>
       <Header />
-      <Container>
+      <Container sx={{ mt: 4 }}>
+        <Box mb={2}>
+          <Breadcrumb links={breadCrumbList} />
+        </Box>
         <SpendTrackerPage entry_id={entry_id} />
       </Container>
     </>
