@@ -23,6 +23,7 @@ import {
   Stack,
   Divider,
   IconButton,
+  Container,
 } from "@mui/material";
 import SpendResult from "@/components/SpendResult";
 import GenerateSpendReport from "@/core/GenerateSpendReport";
@@ -99,9 +100,8 @@ const SpendTrackerPage = ({ entry_id }) => {
     setOpenPersonDialog(true);
   };
 
-  const handleCloseAddPerson = (people) => {
+  const handleCloseAddPerson = () => {
     setOpenPersonDialog(false);
-    setPeople(people);
   };
 
   const handleReset = () => {
@@ -139,7 +139,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   useEffect(() => {
     fetchSpends();
     fetchPeople();
-  }, []);
+  }, [openPersonDialog]);
 
   const handleEditSpend = async (spend) => {
     try {
@@ -180,7 +180,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         onSubmit={handleEditSpend}
         item={editSpend}
       />
-      <Box p={4}>
+      <Box mt={4}>
         <Stack direction="row" spacing={2}>
           <Button
             variant="contained"
@@ -219,7 +219,9 @@ function home() {
   return (
     <>
       <Header />
-      <SpendTrackerPage entry_id={AppConstants.OFFLINE} />
+      <Container>
+        <SpendTrackerPage entry_id={AppConstants.OFFLINE} />
+      </Container>
     </>
   );
 }

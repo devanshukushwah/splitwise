@@ -17,7 +17,7 @@ export const postSpend = async ({ entry_id, spend }) => {
     const spends = getStoredSpends(entry_id);
     const gSpend = {
       ...spend,
-      _id: spend._id || Date.now().toString(),
+      _id: spend._id || "" + (spends.length + 1),
       created_by: AppConstants.OFFLINE,
       created_at: new Date(),
     };

@@ -17,7 +17,7 @@ export const postPeople = async ({ entry_id, person }) => {
     const people = getStoredPeople(entry_id);
     const gPerson = {
       ...person,
-      _id: person._id || Date.now().toString(),
+      _id: person._id || "" + (people.length + 1),
       created_by: AppConstants.OFFLINE,
       created_at: new Date(),
     };
