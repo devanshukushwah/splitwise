@@ -57,7 +57,7 @@ const PeopleDialog = ({
   };
 
   const handleClose = () => {
-    onClose(people);
+    onClose();
     setName("");
   };
 

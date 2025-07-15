@@ -142,9 +142,8 @@ const SpendTrackerPage = ({ entry_id }) => {
     setOpenPersonDialog(true);
   };
 
-  const handleCloseAddPerson = async (people) => {
+  const handleCloseAddPerson = async () => {
     setOpenPersonDialog(false);
-    setPeople(people);
   };
 
   useEffect(() => {
@@ -179,7 +178,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   useEffect(() => {
     fetchSpends();
     fetchPeople();
-  }, []);
+  }, [openPersonDialog]);
 
   const handleShareClose = () => {
     setShareDialog(false);
