@@ -47,15 +47,14 @@ export const deletePeople = async ({ entry_id, person }) => {
   try {
     const people = getStoredPeople(entry_id);
     const markIsDeleted = people.map((item) => {
-      if (item._id === person._id) {
-        return {
-          ...item,
-          isDeleted: true,
-          changed_at: Date.now().toString(),
-          changed_by: AppConstants.OFFLINE,
-        };
-      }
-      return item;
+      return item._id === person._id
+        ? {
+            ...item,
+            isDeleted: true,
+            changed_at: Date.now().toString(),
+            changed_by: AppConstants.OFFLINE,
+          }
+        : item;
     });
     savePeople(entry_id, markIsDeleted);
     return { success: true, message: "person deleted successfully" };

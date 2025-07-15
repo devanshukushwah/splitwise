@@ -40,18 +40,15 @@ import Header from "@/components/Header";
 import SpendTable from "@/components/SpendTable";
 import PeopleDialog from "@/components/PeopleDialog";
 import { deletePeople, getPeople, postPeople } from "@/apiLocalStorage/people";
+import { getSpends, putSpend } from "@/apiLocalStorage/spend";
 
-const SpendTrackerPage = () => {
+const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
-  const [people, setPeople] = useState(
-    loadFromLocalStorageElseDefault(AppConstants.PEOPLE_OFFLINE, [])
-  );
+  const [people, setPeople] = useState([]);
   const [peopleMap, setPeopleMap] = useState({});
-  const [spends, setSpends] = useState(
-    loadFromLocalStorageElseDefault(AppConstants.SPENDS_OFFLINE, [])
-  );
+  const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
 
   useEffect(() => {
@@ -89,16 +86,6 @@ const SpendTrackerPage = () => {
     handleClose();
   };
 
-  const handleEditSpend = (form) => {
-    const updatedSpends = spends.map((item) =>
-      item._id === form._id ? { ...form } : item
-    );
-    setSpends(updatedSpends);
-    saveToLocalStorage(AppConstants.SPENDS_OFFLINE, updatedSpends);
-    setEditDialog(false);
-    setEditSpend(null);
-  };
-
   const handleOpenAddPerson = () => {
     setOpenPersonDialog(true);
   };
@@ -120,8 +107,45 @@ const SpendTrackerPage = () => {
     setReport(newReport);
   }, [spends, people]);
 
-  const getPersonNames = (spendFor) => {
-    return spendFor.map((id) => peopleMap[id] || "Unknown").join(", ");
+  const fetchSpends = async () => {
+    try {
+      const response = await getSpends({ entry_id });
+      const spends = response?.data?.spends || [];
+      setSpends(spends);
+    } catch (error) {
+      console.error("Error fetching spends:", error);
+    }
+  };
+
+  const fetchPeople = async () => {
+    try {
+      const response = await getPeople({ entry_id });
+      const people = response?.data?.people || [];
+      setPeople(people);
+    } catch (error) {
+      console.error("Error fetching people:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchSpends();
+    fetchPeople();
+  }, []);
+
+  const handleEditSpend = async (spend) => {
+    try {
+      const response = await putSpend({ entry_id, spend });
+      if (response.success) {
+        const updatedSpends = spends.map((item) =>
+          item._id === spend._id ? { ...spend } : item
+        );
+        setSpends(updatedSpends);
+      }
+      setEditDialog(false);
+      setEditSpend(null);
+    } catch (error) {
+      console.error("Error editing spends:", error);
+    }
   };
 
   return (
@@ -186,7 +210,7 @@ function home() {
   return (
     <>
       <Header />
-      <SpendTrackerPage />
+      <SpendTrackerPage entry_id={AppConstants.OFFLINE} />
     </>
   );
 }
