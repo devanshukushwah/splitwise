@@ -25,6 +25,7 @@ import {
   Stack,
   Divider,
   IconButton,
+  Container,
 } from "@mui/material";
 import SpendResult from "@/components/SpendResult";
 import GenerateSpendReport from "@/core/GenerateSpendReport";
@@ -215,7 +216,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         entry_id={entry_id}
       />
 
-      <Box p={4}>
+      <Box mt={4}>
         <Stack direction="row" spacing={2} mb={3}>
           <Button
             variant="contained"
@@ -255,7 +256,9 @@ function Page({ params }) {
   return (
     <>
       <Header />
-      <SpendTrackerPage entry_id={entry_id} />
+      <Container maxWidth="md">
+        <SpendTrackerPage entry_id={entry_id} />
+      </Container>
     </>
   );
 }
