@@ -40,7 +40,7 @@ import Header from "@/components/Header";
 import SpendTable from "@/components/SpendTable";
 import PeopleDialog from "@/components/PeopleDialog";
 import { deletePeople, getPeople, postPeople } from "@/apiLocalStorage/people";
-import { getSpends, putSpend } from "@/apiLocalStorage/spend";
+import { getSpends, postSpend, putSpend } from "@/apiLocalStorage/spend";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
@@ -79,11 +79,20 @@ const SpendTrackerPage = ({ entry_id }) => {
     setEditDialog(false);
   };
 
-  const handleAddSpend = (form) => {
-    const newSpends = [...spends, { ...form, _id: spends.length + 1 }];
-    setSpends(newSpends);
-    saveToLocalStorage(AppConstants.SPENDS_OFFLINE, newSpends);
-    handleClose();
+  const handleAddSpend = async (spend) => {
+    try {
+      const response = await postSpend({ entry_id, spend });
+      if (response.success) {
+        const newSpends = [
+          ...spends,
+          { ...spend, _id: response.data.spend_id },
+        ];
+        setSpends(newSpends);
+      }
+      handleClose();
+    } catch (error) {
+      console.error("Error adding spends:", error);
+    }
   };
 
   const handleOpenAddPerson = () => {
@@ -153,7 +162,7 @@ const SpendTrackerPage = ({ entry_id }) => {
       <PeopleDialog
         open={openPersonDialog}
         onClose={handleCloseAddPerson}
-        entry_id={AppConstants.OFFLINE}
+        entry_id={entry_id}
         apiDeletePeople={deletePeople}
         apiGetPeople={getPeople}
         apiPostPeople={postPeople}

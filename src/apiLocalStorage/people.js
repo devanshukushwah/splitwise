@@ -19,7 +19,7 @@ export const postPeople = async ({ entry_id, person }) => {
       ...person,
       _id: person._id || Date.now().toString(),
       created_by: AppConstants.OFFLINE,
-      created_at: Date.now().toString(),
+      created_at: new Date(),
     };
     people.push(gPerson);
     savePeople(entry_id, people);
@@ -51,7 +51,7 @@ export const deletePeople = async ({ entry_id, person }) => {
         ? {
             ...item,
             isDeleted: true,
-            changed_at: Date.now().toString(),
+            changed_at: new Date(),
             changed_by: AppConstants.OFFLINE,
           }
         : item;

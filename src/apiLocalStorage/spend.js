@@ -19,7 +19,7 @@ export const postSpend = async ({ entry_id, spend }) => {
       ...spend,
       _id: spend._id || Date.now().toString(),
       created_by: AppConstants.OFFLINE,
-      created_at: Date.now().toString(),
+      created_at: new Date(),
     };
     spends.push(gSpend);
     saveSpends(entry_id, spends);
@@ -52,7 +52,7 @@ export const putSpend = async ({ entry_id, spend }) => {
             ...item,
             ...spend,
             changed_by: AppConstants.OFFLINE,
-            changed_at: Date.now().toString(),
+            changed_at: new Date(),
           }
         : item
     );
