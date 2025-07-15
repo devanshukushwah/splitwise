@@ -39,17 +39,18 @@ import SpendDialog from "@/components/SpendDialog";
 import Header from "@/components/Header";
 import SpendTable from "@/components/SpendTable";
 import PeopleDialog from "@/components/PeopleDialog";
+import { deletePeople, getPeople, postPeople } from "@/apiLocalStorage/people";
 
 const SpendTrackerPage = () => {
   const [open, setOpen] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
   const [people, setPeople] = useState(
-    loadFromLocalStorageElseDefault(AppConstants.PEOPLE, [])
+    loadFromLocalStorageElseDefault(AppConstants.PEOPLE_OFFLINE, [])
   );
   const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState(
-    loadFromLocalStorageElseDefault(AppConstants.SPENDS, [])
+    loadFromLocalStorageElseDefault(AppConstants.SPENDS_OFFLINE, [])
   );
   const [editSpend, setEditSpend] = useState(null);
 
@@ -84,7 +85,7 @@ const SpendTrackerPage = () => {
   const handleAddSpend = (form) => {
     const newSpends = [...spends, { ...form, _id: spends.length + 1 }];
     setSpends(newSpends);
-    saveToLocalStorage(AppConstants.SPENDS, newSpends);
+    saveToLocalStorage(AppConstants.SPENDS_OFFLINE, newSpends);
     handleClose();
   };
 
@@ -93,7 +94,7 @@ const SpendTrackerPage = () => {
       item._id === form._id ? { ...form } : item
     );
     setSpends(updatedSpends);
-    saveToLocalStorage(AppConstants.SPENDS, updatedSpends);
+    saveToLocalStorage(AppConstants.SPENDS_OFFLINE, updatedSpends);
     setEditDialog(false);
     setEditSpend(null);
   };
@@ -102,20 +103,16 @@ const SpendTrackerPage = () => {
     setOpenPersonDialog(true);
   };
 
-  const handleCloseAddPerson = (person) => {
+  const handleCloseAddPerson = (people) => {
     setOpenPersonDialog(false);
-    if (person) {
-      const newPeople = [...people, { ...person, _id: people.length + 1 }];
-      setPeople(newPeople);
-      saveToLocalStorage(AppConstants.PEOPLE, newPeople);
-    }
+    setPeople(people);
   };
 
   const handleReset = () => {
     setSpends([]);
     setPeople([]);
-    saveToLocalStorage(AppConstants.SPENDS, []);
-    saveToLocalStorage(AppConstants.PEOPLE, []);
+    saveToLocalStorage(AppConstants.SPENDS_OFFLINE, []);
+    saveToLocalStorage(AppConstants.PEOPLE_OFFLINE, []);
   };
 
   useEffect(() => {
@@ -129,7 +126,14 @@ const SpendTrackerPage = () => {
 
   return (
     <>
-      <PeopleDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
+      <PeopleDialog
+        open={openPersonDialog}
+        onClose={handleCloseAddPerson}
+        entry_id={AppConstants.OFFLINE}
+        apiDeletePeople={deletePeople}
+        apiGetPeople={getPeople}
+        apiPostPeople={postPeople}
+      />
       <SpendDialog
         open={open}
         people={people}

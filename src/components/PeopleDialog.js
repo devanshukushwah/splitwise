@@ -27,7 +27,14 @@ import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import { AppConstants } from "@/common/AppConstants";
 
-const PeopleDialog = ({ open, onClose, entry_id }) => {
+const PeopleDialog = ({
+  open,
+  onClose,
+  entry_id,
+  apiGetPeople,
+  apiPostPeople,
+  apiDeletePeople,
+}) => {
   const [people, setPeople] = useState([]);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
@@ -72,55 +79,53 @@ const PeopleDialog = ({ open, onClose, entry_id }) => {
     setName("");
   };
 
-  const handlePersonSubmit = (person) => {
+  const handlePersonSubmit = async (person) => {
     startAddPersonLoading();
-    api
-      .post(HttpUrlConfig.postPeopleUrl(entry_id), person)
-      .then((response) => {
-        if (response?.data?.success) {
-          stopAddPersonLoading({
-            callback: () => {
-              const newPerson = response.data.data.person;
+    try {
+      const response = await apiPostPeople({ entry_id, person });
+      if (response?.success) {
+        stopAddPersonLoading({
+          callback: () => {
+            const newPerson = response?.data?.person;
+            if (newPerson) {
               setPeople([...people, newPerson]);
-            },
-          });
-        }
+            }
+          },
+        });
+      } else {
         stopAddPersonLoading();
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-        stopAddPersonLoading();
-      });
+      }
+    } catch (error) {
+      console.error("Error submitting person:", error);
+      stopAddPersonLoading();
+    }
   };
 
   const fetchPeople = async () => {
-    api
-      .get(HttpUrlConfig.getPeopleUrl(entry_id))
-      .then((response) => {
-        setPeople(response?.data?.data?.people || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
+    try {
+      const response = await apiGetPeople({ entry_id });
+      const people = response?.data?.people || [];
+      setPeople(people);
+    } catch (error) {
+      console.error("Error fetching people:", error);
+    }
   };
 
-  const handleDelete = (person) => {
-    api
-      .delete(HttpUrlConfig.deletePeopleUrl(entry_id, person._id))
-      .then((response) => {
-        if (response?.data?.success) {
-          const updatedPeople = people.map((item) => {
-            if (item._id === person._id) {
-              return { ...item, isDeleted: true };
-            }
-            return item;
-          });
-          setPeople(updatedPeople);
-        }
-      })
-      .catch((error) => {
-        console.error("Error deleting person:", error);
-      });
+  const handleDelete = async (person) => {
+    try {
+      const response = await apiDeletePeople({ entry_id, person });
+      if (response?.success) {
+        const updatedPeople = people.map((item) => {
+          if (item._id === person._id) {
+            return { ...item, isDeleted: true };
+          }
+          return item;
+        });
+        setPeople(updatedPeople);
+      }
+    } catch (error) {
+      console.error("Error deleting person:", error);
+    }
   };
 
   useEffect(() => {
@@ -196,7 +201,7 @@ const PeopleDialog = ({ open, onClose, entry_id }) => {
                 ?.filter((item) => item?.isDeleted !== true)
                 ?.map((person) => (
                   <Tooltip
-                    key={person.name}
+                    key={person._id}
                     title={`Added by ${person.created_by} on ${new Date(
                       person.created_at
                     ).toLocaleDateString()}`}

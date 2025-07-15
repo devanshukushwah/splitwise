@@ -4,4 +4,7 @@ export const AppConstants = {
   PEOPLE: "people",
   USERS: "users",
   ENTRIES: "entries",
+  OFFLINE: "offline",
+  PEOPLE_OFFLINE: "people_offline",
+  SPENDS_OFFLINE: "spends_offline",
 };
