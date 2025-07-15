@@ -38,7 +38,7 @@ export const POST = withAuth(async (request, { params }) => {
     });
   }
 
-  const newPerson = {
+  let newPerson = {
     name,
     entry_id,
     created_at: new Date(),
@@ -46,8 +46,10 @@ export const POST = withAuth(async (request, { params }) => {
   };
   const result = await collection.insertOne(newPerson);
 
+  newPerson._id = result.insertedId;
+
   return new Response(
-    JSON.stringify({ success: true, data: { person_id: result.insertedId } }),
+    JSON.stringify({ success: true, data: { person: newPerson } }),
     {
       headers: { "Content-Type": "application/json" },
       status: 201,

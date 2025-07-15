@@ -19,6 +19,10 @@ export class HttpUrlConfig {
     return `${this.getBaseUrl()}/entries/${entry_id}/people`;
   }
 
+  static deletePeopleUrl(entry_id, person_id) {
+    return `${this.getBaseUrl()}/entries/${entry_id}/people/${person_id}`;
+  }
+
   static getSharesUrl(entry_id) {
     return `${this.getBaseUrl()}/entries/${entry_id}/shares`;
   }

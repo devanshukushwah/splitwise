@@ -1,6 +1,7 @@
 import { getCurrentUTCDateTimeLocal } from "@/utils/DateUtils";
 import { DisabledByDefault } from "@mui/icons-material";
 import {
+  Box,
   Button,
   Checkbox,
   Dialog,
@@ -65,7 +66,9 @@ function SpendDialog({
 
   // Method to select all people for spend_for
   const handleSelectAll = () => {
-    const allIds = people.map((person) => person._id);
+    const allIds = people
+      .filter((item) => item?.isDeleted !== true)
+      .map((person) => person._id);
     setSpend({ ...spend, spend_for: allIds });
   };
 
@@ -103,6 +106,7 @@ function SpendDialog({
             value={spend?.title}
             onChange={handleChange}
             autoFocus
+            size="small"
           />
           <TextField
             label="Amount"
@@ -113,6 +117,7 @@ function SpendDialog({
             value={spend?.amount}
             onChange={handleChange}
             InputProps={{ inputProps: { min: 0 } }}
+            size="small"
           />
           <TextField
             label="Spend By"
@@ -122,15 +127,19 @@ function SpendDialog({
             variant="outlined"
             value={spend?.spend_by}
             onChange={handleChange}
+            size="small"
           >
-            {people.map((person) => (
-              <MenuItem key={person._id} value={person._id}>
-                <ListItemText primary={person.name} />
-              </MenuItem>
-            ))}
+            {people
+              ?.filter((item) => item?.isDeleted !== true)
+              ?.map((person) => (
+                <MenuItem key={person._id} value={person._id}>
+                  <ListItemText primary={person.name} />
+                </MenuItem>
+              ))}
           </TextField>
           <Stack direction="row" spacing={1}>
             <TextField
+              size="small"
               label="Spend For"
               name="spend_for"
               fullWidth
@@ -152,20 +161,62 @@ function SpendDialog({
                 setSpend({ ...spend, spend_for: value });
               }}
             >
-              {people.map((person) => (
-                <MenuItem key={person._id} value={person._id}>
-                  <Checkbox
-                    checked={spend?.spend_for?.includes(person._id) || false}
-                  />
-                  <ListItemText primary={person.name} />
-                </MenuItem>
-              ))}
+              {people
+                ?.filter((item) => item?.isDeleted !== true)
+                ?.map((person) => (
+                  <MenuItem key={person._id} value={person._id}>
+                    <Checkbox
+                      checked={spend?.spend_for?.includes(person._id) || false}
+                    />
+                    <ListItemText primary={person.name} />
+                  </MenuItem>
+                ))}
+              {people
+                ?.filter(
+                  (item) =>
+                    item?.isDeleted === true &&
+                    spend?.spend_for?.includes(item._id)
+                )
+                ?.map((person) => (
+                  <MenuItem
+                    key={person._id}
+                    value={person._id}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Checkbox
+                        checked={
+                          spend?.spend_for?.includes(person._id) || false
+                        }
+                      />
+                      <ListItemText primary={person.name} />
+                    </Box>
+                    <Typography
+                      variant="caption"
+                      color="error"
+                      sx={{
+                        bgcolor: "rgba(255,0,0,0.1)",
+                        px: 1,
+                        py: 0.5,
+                        borderRadius: 1,
+                        fontWeight: 500,
+                      }}
+                    >
+                      deleted
+                    </Typography>
+                  </MenuItem>
+                ))}
             </TextField>
             <Button variant="outlined" onClick={handleSelectAll}>
               All
             </Button>
           </Stack>
           <TextField
+            size="small"
             label="Time"
             name="created_at"
             type="datetime-local"

@@ -157,7 +157,7 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
           <Typography variant="subtitle2" color="text.secondary" mb={1}>
             Shared With
           </Typography>
-          <Stack direction="row" spacing={1} flexWrap="wrap">
+          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
             {shares.length === 0 ? (
               <Typography variant="body2" color="text.disabled">
                 No shares yet.
@@ -177,7 +177,6 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
                     label={share.email}
                     variant="outlined"
                     onDelete={() => handleDelete(share)}
-                    sx={{ mb: 1 }}
                   />
                 </Tooltip>
               ))

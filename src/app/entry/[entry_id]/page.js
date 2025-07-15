@@ -3,7 +3,6 @@
 import Header from "@/components/Header";
 import { use } from "react";
 import React, { useEffect, useState } from "react";
-import AddPersonDialog from "@/components/AddPersonDialog";
 import { getCurrentUTCDateTimeLocal } from "@/utils/DateUtils";
 import {
   Box,
@@ -40,6 +39,11 @@ import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
 import ShareDialog from "@/components/ShareDialog";
 import SpendTable from "@/components/SpendTable";
+import { People } from "@mui/icons-material";
+import PeopleDialog from "@/components/PeopleDialog";
+
+import { deletePeople, getPeople, postPeople } from "@/api/people";
+import { getSpends, postSpend, putSpend } from "@/api/spend";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const [open, setOpen] = useState(false);
@@ -93,65 +97,53 @@ const SpendTrackerPage = ({ entry_id }) => {
     }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
   };
 
-  const handleAddSpend = (spend) => {
+  const handleAddSpend = async (spend) => {
     startSpendLoading();
-    api
-      .post(HttpUrlConfig.postSpendUrl(entry_id), spend)
-      .then((response) => {
+    try {
+      const response = await postSpend({ entry_id, spend });
+      if (response.success) {
         const newSpends = [
           ...spends,
-          { ...spend, _id: response.data.data.spend_id },
+          { ...spend, _id: response.data.spend_id },
         ];
         setSpends(newSpends);
-        stopSpendLoading({ callback: () => handleClose() });
-      })
-      .catch((error) => {
-        stopSpendLoading();
-      });
+      }
+      stopSpendLoading({ callback: () => handleClose() });
+    } catch (error) {
+      console.error("Error adding spends:", error);
+      stopSpendLoading();
+    }
   };
 
-  const handleEditSpend = (spend) => {
+  const handleEditSpend = async (spend) => {
     startSpendLoading();
-    api
-      .put(HttpUrlConfig.putSpendsUrl(entry_id, spend._id), spend)
-      .then((response) => {
+    try {
+      const response = await putSpend({ entry_id, spend });
+      if (response.success) {
         const updatedSpends = spends.map((item) =>
           item._id === spend._id ? { ...spend } : item
         );
         setSpends(updatedSpends);
-        stopSpendLoading({
-          callback: () => {
-            setEditDialog(false);
-            setEditSpend(null);
-          },
-        });
-      })
-      .catch((error) => {
-        stopSpendLoading();
+      }
+      stopSpendLoading({
+        callback: () => {
+          setEditDialog(false);
+          setEditSpend(null);
+        },
       });
+    } catch (error) {
+      console.error("Error editing spends:", error);
+      stopSpendLoading();
+    }
   };
 
   const handleOpenAddPerson = () => {
     setOpenPersonDialog(true);
   };
 
-  const handleCloseAddPerson = async (person) => {
+  const handleCloseAddPerson = async (people) => {
     setOpenPersonDialog(false);
-    if (person) {
-      api
-        .post(HttpUrlConfig.postPeopleUrl(entry_id), person)
-        .then((response) => {
-          const newPerson = {
-            _id: response?.data?.data?.person_id,
-            name: person.name,
-          };
-
-          setPeople([...people, newPerson]);
-        })
-        .catch((error) => {
-          console.error("Error fetching people:", error);
-        });
-    }
+    setPeople(people);
   };
 
   useEffect(() => {
@@ -164,25 +156,23 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   const fetchSpends = async () => {
-    api
-      .get(HttpUrlConfig.getSpendsUrl(entry_id))
-      .then((response) => {
-        setSpends(response?.data?.data?.spends || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching spends:", error);
-      });
+    try {
+      const response = await getSpends({ entry_id });
+      const spends = response?.data?.spends || [];
+      setSpends(spends);
+    } catch (error) {
+      console.error("Error fetching spends:", error);
+    }
   };
 
   const fetchPeople = async () => {
-    api
-      .get(HttpUrlConfig.getPeopleUrl(entry_id))
-      .then((response) => {
-        setPeople(response?.data?.data?.people || []);
-      })
-      .catch((error) => {
-        console.error("Error fetching people:", error);
-      });
+    try {
+      const response = await getPeople({ entry_id });
+      const people = response?.data?.people || [];
+      setPeople(people);
+    } catch (error) {
+      console.error("Error fetching people:", error);
+    }
   };
 
   useEffect(() => {
@@ -196,7 +186,14 @@ const SpendTrackerPage = ({ entry_id }) => {
 
   return (
     <>
-      <AddPersonDialog open={openPersonDialog} onClose={handleCloseAddPerson} />
+      <PeopleDialog
+        open={openPersonDialog}
+        onClose={handleCloseAddPerson}
+        entry_id={entry_id}
+        apiDeletePeople={deletePeople}
+        apiGetPeople={getPeople}
+        apiPostPeople={postPeople}
+      />
       <SpendDialog
         open={open}
         people={people}

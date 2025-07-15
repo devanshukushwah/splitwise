@@ -1,6 +1,7 @@
-import { Divider, List, ListItem, ListItemText } from "@mui/material";
+import { Divider, List, ListItem, ListItemText, Stack } from "@mui/material";
 import React from "react";
 import { Tabs, Tab, Box, Typography } from "@mui/material";
+import Currency from "./Currency";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -50,9 +51,16 @@ function ShowResultBox({ list, peopleMap }) {
         <React.Fragment key={index}>
           <ListItem>
             <ListItemText
-              primary={`₹ ${spend.amount.toFixed(2)} : ${
-                peopleMap[spend.from_person_id]
-              } should pay ${peopleMap[spend.to_person_id]}`}
+              primary={
+                <Box component="span" sx={{ display: "inline" }}>
+                  <Currency
+                    amount={spend.amount}
+                    rightLabel={` : ${
+                      peopleMap[spend.from_person_id]
+                    } should pay ${peopleMap[spend.to_person_id]}`}
+                  />
+                </Box>
+              }
             />
           </ListItem>
           <Divider component="li" />
