@@ -256,7 +256,7 @@ function Page({ params }) {
   return (
     <>
       <Header />
-      <Container maxWidth="md">
+      <Container>
         <SpendTrackerPage entry_id={entry_id} />
       </Container>
     </>

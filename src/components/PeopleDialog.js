@@ -192,7 +192,7 @@ const PeopleDialog = ({
             People List
           </Typography>
           <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-            {people.length === 0 ? (
+            {people?.filter((item) => item?.isDeleted !== true).length === 0 ? (
               <Typography variant="body2" color="text.disabled">
                 No people yet.
               </Typography>
