@@ -40,7 +40,7 @@ import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
 import CollabDialog from "@/components/CollabDialog";
 import SpendTable from "@/components/SpendTable";
-import { People } from "@mui/icons-material";
+import { Label, People } from "@mui/icons-material";
 import PeopleDialog from "@/components/PeopleDialog";
 
 import { deletePeople, getPeople, postPeople } from "@/api/people";
@@ -49,6 +49,7 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { useApiState } from "@/context/ApiStateContext";
 import Loader from "@/components/Loader";
 import GroupsIcon from "@mui/icons-material/Groups";
+import CenteredErrorMessage from "@/components/CenteredErrorMessage";
 
 const SpendTrackerPage = ({ entry_id }) => {
   const { people, setPeople } = useApiState();
@@ -63,6 +64,8 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [spendLoading, setSpendLoading] = useState(false);
   const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
   const [report, setReport] = useState([]);
+  const [dirPath, setDirpath] = useState([]);
+  const [appError, setAppError] = useState(null);
 
   useEffect(() => {
     let peopleMap = {};
@@ -182,10 +185,29 @@ const SpendTrackerPage = ({ entry_id }) => {
       const response = await getSpends({ entry_id });
       const spends = response?.data?.spends || [];
       setSpends(spends);
+      constructDirectory(response?.data?.entry);
       stopFetchSpendLoading();
     } catch (error) {
       console.error("Error fetching spends:", error);
+      if (error?.response?.data?.isAppError) {
+        setAppError({ message: error?.response?.data?.error });
+      }
     }
+  };
+
+  const constructDirectory = (entry) => {
+    const links = [
+      {
+        label: "Dashboad",
+        href: "/dashboard",
+      },
+      {
+        label: entry?.title,
+        isText: true,
+      },
+    ];
+
+    setDirpath(links);
   };
 
   const fetchPeople = async () => {
@@ -207,10 +229,14 @@ const SpendTrackerPage = ({ entry_id }) => {
     setShareDialog(false);
   };
 
+  if (appError) {
+    return <CenteredErrorMessage message={appError?.message} />;
+  }
+
   return (
     <>
       <Box mb={2}>
-        <Breadcrumb links={[]} />
+        <Breadcrumb links={dirPath} />
       </Box>
       <PeopleDialog
         open={openPersonDialog}
