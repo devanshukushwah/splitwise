@@ -26,7 +26,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 
-const ShareDialog = ({ open, onClose, entry_id }) => {
+const CollabDialog = ({ open, onClose, entry_id }) => {
   const [shares, setShares] = useState([]);
   const [email, setEmail] = useState("");
 
@@ -115,7 +115,7 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
         }}
       >
         <Typography variant="h6" fontWeight={600}>
-          Share Entry
+          Collab
         </Typography>
         <Button
           onClick={handleClose}
@@ -155,12 +155,12 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
           </Stack>
           <Divider />
           <Typography variant="subtitle2" color="text.secondary" mb={1}>
-            Shared With
+            Collab with
           </Typography>
           <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
             {shares.length === 0 ? (
               <Typography variant="body2" color="text.disabled">
-                No shares yet.
+                No collab yet.
               </Typography>
             ) : (
               shares.map((share) => (
@@ -188,4 +188,4 @@ const ShareDialog = ({ open, onClose, entry_id }) => {
   );
 };
 
-export default ShareDialog;
+export default CollabDialog;
