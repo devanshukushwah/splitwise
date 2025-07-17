@@ -26,6 +26,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import { AppConstants } from "@/common/AppConstants";
+import { useApiState } from "@/context/ApiStateContext";
 
 const PeopleDialog = ({
   open,
@@ -35,7 +36,7 @@ const PeopleDialog = ({
   apiPostPeople,
   apiDeletePeople,
 }) => {
-  const [people, setPeople] = useState([]);
+  const { people, setPeople } = useApiState();
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [addPersonLoading, setAddPersonLoading] = useState(false);

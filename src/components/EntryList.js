@@ -21,6 +21,7 @@ import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import Loader from "./Loader";
 import { AppConstants } from "@/common/AppConstants";
 import CloseIcon from "@mui/icons-material/Close";
+import { useApiState } from "@/context/ApiStateContext";
 
 export default function EntryList() {
   const [open, setOpen] = useState(false);
@@ -89,7 +90,7 @@ export default function EntryList() {
 
   return (
     <>
-      <Box sx={{ mt: 4 }}>
+      <Box>
         <Box
           display="flex"
           justifyContent="space-between"
@@ -162,9 +163,9 @@ export default function EntryList() {
 const Entries = ({ entries }) => {
   const router = useRouter();
 
-  const handleGoClick = (entryId) => {
-    if (!entryId) return;
-    router.push(`/entry/${entryId}`);
+  const handleGoClick = (entry) => {
+    if (!entry._id) return;
+    router.push(`/entry/${entry._id}`);
   };
   return (
     <Stack spacing={2}>
@@ -200,7 +201,7 @@ const Entries = ({ entries }) => {
                   variant="outlined"
                   color="secondary"
                   startIcon={<EastIcon />}
-                  onClick={() => handleGoClick(entry._id)}
+                  onClick={() => handleGoClick(entry)}
                 >
                   Go
                 </Button>

@@ -38,24 +38,31 @@ import SpendDialog from "@/components/SpendDialog";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
-import ShareDialog from "@/components/ShareDialog";
+import CollabDialog from "@/components/CollabDialog";
 import SpendTable from "@/components/SpendTable";
 import { People } from "@mui/icons-material";
 import PeopleDialog from "@/components/PeopleDialog";
 
 import { deletePeople, getPeople, postPeople } from "@/api/people";
 import { getSpends, postSpend, putSpend } from "@/api/spend";
+import Breadcrumb from "@/components/Breadcrumb";
+import { useApiState } from "@/context/ApiStateContext";
+import Loader from "@/components/Loader";
+import GroupsIcon from "@mui/icons-material/Groups";
 
 const SpendTrackerPage = ({ entry_id }) => {
+  const { people, setPeople } = useApiState();
+
   const [open, setOpen] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
-  const [people, setPeople] = useState([]);
   const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
   const [spendLoading, setSpendLoading] = useState(false);
+  const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
+  const [report, setReport] = useState([]);
 
   useEffect(() => {
     let peopleMap = {};
@@ -64,8 +71,6 @@ const SpendTrackerPage = ({ entry_id }) => {
     }
     setPeopleMap(peopleMap);
   }, [people]);
-
-  const [report, setReport] = useState([]);
 
   const handleOpen = () => {
     setOpen(true);
@@ -92,6 +97,22 @@ const SpendTrackerPage = ({ entry_id }) => {
   const stopSpendLoading = ({ callback = () => {}, timeout = null } = {}) => {
     setTimeout(() => {
       setSpendLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
+  };
+
+  const startFetchSpendLoading = () => {
+    setFetchSpendLoading(true);
+  };
+
+  const stopFetchSpendLoading = ({
+    callback = () => {},
+    timeout = null,
+  } = {}) => {
+    setTimeout(() => {
+      setFetchSpendLoading(false);
       if (typeof callback === "function") {
         callback();
       }
@@ -156,10 +177,12 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   const fetchSpends = async () => {
+    startFetchSpendLoading();
     try {
       const response = await getSpends({ entry_id });
       const spends = response?.data?.spends || [];
       setSpends(spends);
+      stopFetchSpendLoading();
     } catch (error) {
       console.error("Error fetching spends:", error);
     }
@@ -178,7 +201,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   useEffect(() => {
     fetchSpends();
     fetchPeople();
-  }, [openPersonDialog]);
+  }, []);
 
   const handleShareClose = () => {
     setShareDialog(false);
@@ -186,6 +209,9 @@ const SpendTrackerPage = ({ entry_id }) => {
 
   return (
     <>
+      <Box mb={2}>
+        <Breadcrumb links={[]} />
+      </Box>
       <PeopleDialog
         open={openPersonDialog}
         onClose={handleCloseAddPerson}
@@ -209,13 +235,13 @@ const SpendTrackerPage = ({ entry_id }) => {
         item={editSpend}
         loading={spendLoading}
       />
-      <ShareDialog
+      <CollabDialog
         open={shareDialog}
         onClose={handleShareClose}
         entry_id={entry_id}
       />
 
-      <Box mt={4}>
+      <Box>
         <Stack direction="row" spacing={2} mb={3}>
           <Button
             variant="contained"
@@ -235,13 +261,17 @@ const SpendTrackerPage = ({ entry_id }) => {
           </Button>
           <Button
             variant="outlined"
-            startIcon={<ShareIcon />}
+            startIcon={<GroupsIcon />}
             onClick={() => setShareDialog(true)}
           >
-            Share
+            Collab
           </Button>
         </Stack>
-        <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />
+        {fetchSpendLoading ? (
+          <Loader times={1} height={150} />
+        ) : (
+          <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />
+        )}
         <Divider sx={{ margin: 2 }} />
         <SpendResult data={report} people={people} />
       </Box>
@@ -255,7 +285,7 @@ function Page({ params }) {
   return (
     <>
       <Header />
-      <Container>
+      <Container sx={{ mt: 4 }}>
         <SpendTrackerPage entry_id={entry_id} />
       </Container>
     </>
