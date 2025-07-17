@@ -8,7 +8,12 @@ function Loader({ height = 70, times = 2, rounded, width, direction }) {
       <Stack gap={2} direction={direction}>
         {[...Array(times)].map((_, idx) =>
           rounded ? (
-            <Skeleton variant="rounded" width={width} height={height} />
+            <Skeleton
+              key={idx}
+              variant="rounded"
+              width={width}
+              height={height}
+            />
           ) : (
             <Skeleton
               key={idx}
