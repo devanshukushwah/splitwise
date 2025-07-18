@@ -197,7 +197,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   const constructDirectory = (entry) => {
     const links = [
       {
-        label: "Dashboad",
+        label: "Dashboard",
         href: "/dashboard",
       },
       {
