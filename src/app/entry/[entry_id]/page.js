@@ -52,7 +52,7 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import CenteredErrorMessage from "@/components/CenteredErrorMessage";
 
 const SpendTrackerPage = ({ entry_id }) => {
-  const { people, setPeople } = useApiState();
+  const { people, setPeople, setDirpath } = useApiState();
 
   const [open, setOpen] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
@@ -64,7 +64,6 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [spendLoading, setSpendLoading] = useState(false);
   const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
   const [report, setReport] = useState([]);
-  const [dirPath, setDirpath] = useState([]);
   const [appError, setAppError] = useState(null);
 
   useEffect(() => {
@@ -235,9 +234,6 @@ const SpendTrackerPage = ({ entry_id }) => {
 
   return (
     <>
-      <Box mb={2}>
-        <Breadcrumb links={dirPath} />
-      </Box>
       <PeopleDialog
         open={openPersonDialog}
         onClose={handleCloseAddPerson}
@@ -293,7 +289,7 @@ const SpendTrackerPage = ({ entry_id }) => {
             Collab
           </Button>
         </Stack>
-        {fetchSpendLoading ? (
+        {fetchSpendLoading || people.length === 0 ? (
           <Loader times={1} height={150} />
         ) : (
           <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />
@@ -307,11 +303,15 @@ const SpendTrackerPage = ({ entry_id }) => {
 
 function Page({ params }) {
   const { entry_id } = use(params);
+  const { dirPath } = useApiState();
 
   return (
     <>
       <Header />
-      <Container sx={{ mt: 4 }}>
+      <Container sx={{ mt: 2 }}>
+        <Box mb={2}>
+          <Breadcrumb links={dirPath} />
+        </Box>
         <SpendTrackerPage entry_id={entry_id} />
       </Container>
     </>
