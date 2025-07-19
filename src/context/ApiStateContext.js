@@ -6,8 +6,19 @@ const ApiStateContext = createContext();
 
 export const ApiStateProvider = ({ children }) => {
   const [people, setPeople] = useState([]);
+
+  // variable for breadcrumb directory path
+  const [dirPath, setDirpath] = useState([]);
+
+  const states = {
+    people,
+    setPeople,
+    dirPath,
+    setDirpath,
+  };
+
   return (
-    <ApiStateContext.Provider value={{ people, setPeople }}>
+    <ApiStateContext.Provider value={states}>
       {children}
     </ApiStateContext.Provider>
   );

@@ -25,10 +25,46 @@ import { SpaceBar } from "@mui/icons-material";
 import CloseIcon from "@mui/icons-material/Close";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
+import { AppConstants } from "@/common/AppConstants";
+import Loader from "./Loader";
 
 const CollabDialog = ({ open, onClose, entry_id }) => {
   const [shares, setShares] = useState([]);
   const [email, setEmail] = useState("");
+  const [addCollabLoading, setAddCollabLoading] = useState(false);
+  const [fetchCollabLoading, setFetchCollabLoading] = useState(false);
+
+  const startAddDialogLoading = () => {
+    setAddCollabLoading(true);
+  };
+
+  const stopAddDialogLoading = ({
+    callback = () => {},
+    timeout = null,
+  } = {}) => {
+    setTimeout(() => {
+      setAddCollabLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING);
+  };
+
+  const startFetchDialogLoading = () => {
+    setFetchCollabLoading(true);
+  };
+
+  const stopFetchDialogLoading = ({
+    callback = () => {},
+    timeout = null,
+  } = {}) => {
+    setTimeout(() => {
+      setFetchCollabLoading(false);
+      if (typeof callback === "function") {
+        callback();
+      }
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING);
+  };
 
   const handleClose = () => {
     onClose();
@@ -57,11 +93,16 @@ const CollabDialog = ({ open, onClose, entry_id }) => {
   };
 
   const handleShareSubmit = (email) => {
+    startAddDialogLoading();
     api
       .post(HttpUrlConfig.postSharesUrl(entry_id), email)
       .then((response) => {
         if (response?.data?.success) {
-          fetchShares();
+          stopAddDialogLoading({
+            callback: () => {
+              fetchShares();
+            },
+          });
         }
       })
       .catch((error) => {
@@ -70,13 +111,16 @@ const CollabDialog = ({ open, onClose, entry_id }) => {
   };
 
   const fetchShares = async () => {
+    startFetchDialogLoading();
     api
       .get(HttpUrlConfig.getSharesUrl(entry_id))
       .then((response) => {
         setShares(response?.data?.data?.shares || []);
+        stopFetchDialogLoading();
       })
       .catch((error) => {
         console.error("Error fetching people:", error);
+        stopFetchDialogLoading();
       });
   };
 
@@ -149,6 +193,7 @@ const CollabDialog = ({ open, onClose, entry_id }) => {
               variant="contained"
               startIcon={<AddIcon />}
               sx={{ height: 40, minWidth: 100 }}
+              loading={addCollabLoading}
             >
               Add
             </Button>
@@ -157,8 +202,11 @@ const CollabDialog = ({ open, onClose, entry_id }) => {
           <Typography variant="subtitle2" color="text.secondary" mb={1}>
             Collab with
           </Typography>
+
           <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-            {shares.length === 0 ? (
+            {fetchCollabLoading ? (
+              <Loader times={2} width={100} height={32} direction="row" />
+            ) : shares.length === 0 ? (
               <Typography variant="body2" color="text.disabled">
                 No collab yet.
               </Typography>

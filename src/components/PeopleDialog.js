@@ -149,7 +149,7 @@ const PeopleDialog = ({
         }}
       >
         <Typography variant="h6" fontWeight={600}>
-          Add Person
+          Person
         </Typography>
         <Button
           onClick={handleClose}

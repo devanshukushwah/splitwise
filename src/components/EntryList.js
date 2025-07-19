@@ -22,6 +22,7 @@ import Loader from "./Loader";
 import { AppConstants } from "@/common/AppConstants";
 import CloseIcon from "@mui/icons-material/Close";
 import { useApiState } from "@/context/ApiStateContext";
+import { globalFormatWithLocalize } from "@/utils/DateUtils";
 
 export default function EntryList() {
   const [open, setOpen] = useState(false);
@@ -187,13 +188,7 @@ const Entries = ({ entries }) => {
                   <Typography variant="body1">{entry.title}</Typography>
                   {entry.created_at && (
                     <Typography variant="caption" color="text.secondary">
-                      {new Date(entry.created_at).toLocaleTimeString([], {
-                        year: "2-digit",
-                        month: "short",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {globalFormatWithLocalize(entry.created_at)}
                     </Typography>
                   )}
                 </Box>

@@ -40,7 +40,7 @@ import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
 import CollabDialog from "@/components/CollabDialog";
 import SpendTable from "@/components/SpendTable";
-import { People } from "@mui/icons-material";
+import { Label, People } from "@mui/icons-material";
 import PeopleDialog from "@/components/PeopleDialog";
 
 import { deletePeople, getPeople, postPeople } from "@/api/people";
@@ -49,9 +49,10 @@ import Breadcrumb from "@/components/Breadcrumb";
 import { useApiState } from "@/context/ApiStateContext";
 import Loader from "@/components/Loader";
 import GroupsIcon from "@mui/icons-material/Groups";
+import CenteredErrorMessage from "@/components/CenteredErrorMessage";
 
 const SpendTrackerPage = ({ entry_id }) => {
-  const { people, setPeople } = useApiState();
+  const { people, setPeople, setDirpath } = useApiState();
 
   const [open, setOpen] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
@@ -63,6 +64,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [spendLoading, setSpendLoading] = useState(false);
   const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
   const [report, setReport] = useState([]);
+  const [appError, setAppError] = useState(null);
 
   useEffect(() => {
     let peopleMap = {};
@@ -124,11 +126,7 @@ const SpendTrackerPage = ({ entry_id }) => {
     try {
       const response = await postSpend({ entry_id, spend });
       if (response.success) {
-        const newSpends = [
-          ...spends,
-          { ...spend, _id: response.data.spend_id },
-        ];
-        setSpends(newSpends);
+        setSpends([...spends, { ...response.data.spend }]);
       }
       stopSpendLoading({ callback: () => handleClose() });
     } catch (error) {
@@ -182,10 +180,29 @@ const SpendTrackerPage = ({ entry_id }) => {
       const response = await getSpends({ entry_id });
       const spends = response?.data?.spends || [];
       setSpends(spends);
+      constructDirectory(response?.data?.entry);
       stopFetchSpendLoading();
     } catch (error) {
       console.error("Error fetching spends:", error);
+      if (error?.response?.data?.isAppError) {
+        setAppError({ message: error?.response?.data?.error });
+      }
     }
+  };
+
+  const constructDirectory = (entry) => {
+    const links = [
+      {
+        label: "Dashboard",
+        href: "/dashboard",
+      },
+      {
+        label: entry?.title,
+        isText: true,
+      },
+    ];
+
+    setDirpath(links);
   };
 
   const fetchPeople = async () => {
@@ -207,11 +224,12 @@ const SpendTrackerPage = ({ entry_id }) => {
     setShareDialog(false);
   };
 
+  if (appError) {
+    return <CenteredErrorMessage message={appError?.message} />;
+  }
+
   return (
     <>
-      <Box mb={2}>
-        <Breadcrumb links={[]} />
-      </Box>
       <PeopleDialog
         open={openPersonDialog}
         onClose={handleCloseAddPerson}
@@ -220,21 +238,25 @@ const SpendTrackerPage = ({ entry_id }) => {
         apiGetPeople={getPeople}
         apiPostPeople={postPeople}
       />
-      <SpendDialog
-        open={open}
-        people={people}
-        onClose={handleClose}
-        onSubmit={handleAddSpend}
-        loading={spendLoading}
-      />
-      <SpendDialog
-        open={editDialog}
-        people={people}
-        onClose={handleEditClose}
-        onSubmit={handleEditSpend}
-        item={editSpend}
-        loading={spendLoading}
-      />
+      {open && (
+        <SpendDialog
+          open={open}
+          people={people}
+          onClose={handleClose}
+          onSubmit={handleAddSpend}
+          loading={spendLoading}
+        />
+      )}
+      {editDialog && (
+        <SpendDialog
+          open={editDialog}
+          people={people}
+          onClose={handleEditClose}
+          onSubmit={handleEditSpend}
+          item={editSpend}
+          loading={spendLoading}
+        />
+      )}
       <CollabDialog
         open={shareDialog}
         onClose={handleShareClose}
@@ -281,11 +303,15 @@ const SpendTrackerPage = ({ entry_id }) => {
 
 function Page({ params }) {
   const { entry_id } = use(params);
+  const { dirPath } = useApiState();
 
   return (
     <>
       <Header />
-      <Container sx={{ mt: 4 }}>
+      <Container sx={{ mt: 2 }}>
+        <Box mb={2}>
+          <Breadcrumb links={dirPath} />
+        </Box>
         <SpendTrackerPage entry_id={entry_id} />
       </Container>
     </>
