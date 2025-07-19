@@ -242,21 +242,25 @@ const SpendTrackerPage = ({ entry_id }) => {
         apiGetPeople={getPeople}
         apiPostPeople={postPeople}
       />
-      <SpendDialog
-        open={open}
-        people={people}
-        onClose={handleClose}
-        onSubmit={handleAddSpend}
-        loading={spendLoading}
-      />
-      <SpendDialog
-        open={editDialog}
-        people={people}
-        onClose={handleEditClose}
-        onSubmit={handleEditSpend}
-        item={editSpend}
-        loading={spendLoading}
-      />
+      {open && (
+        <SpendDialog
+          open={open}
+          people={people}
+          onClose={handleClose}
+          onSubmit={handleAddSpend}
+          loading={spendLoading}
+        />
+      )}
+      {editDialog && (
+        <SpendDialog
+          open={editDialog}
+          people={people}
+          onClose={handleEditClose}
+          onSubmit={handleEditSpend}
+          item={editSpend}
+          loading={spendLoading}
+        />
+      )}
       <CollabDialog
         open={shareDialog}
         onClose={handleShareClose}

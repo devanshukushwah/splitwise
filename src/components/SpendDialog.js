@@ -33,7 +33,7 @@ function SpendDialog({
   loading,
   item = null,
 }) {
-  const [spend, setSpend] = React.useState(null);
+  const [spend, setSpend] = React.useState(defaultValue());
 
   const handleChange = (e) => {
     setSpend({ ...spend, [e.target.name]: e.target.value });
@@ -45,12 +45,6 @@ function SpendDialog({
       spendData._id = item._id;
     }
     onSubmit(spendData);
-    setSpend(defaultValue());
-  };
-
-  const handleOnClose = () => {
-    onClose();
-    setSpend(defaultValue());
   };
 
   useEffect(() => {
@@ -89,7 +83,7 @@ function SpendDialog({
           {item ? "Edit Spend" : "Add Spend"}
         </Typography>
         <Button
-          onClick={handleOnClose}
+          onClick={onClose}
           sx={{ minWidth: 0, color: "grey.600" }}
           aria-label="close"
         >
@@ -229,7 +223,7 @@ function SpendDialog({
         </Stack>
       </DialogContent>
       <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
-        <Button onClick={handleOnClose} color="secondary">
+        <Button onClick={onClose} color="secondary">
           Cancel
         </Button>
         <Button
