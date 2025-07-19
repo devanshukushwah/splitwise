@@ -126,11 +126,7 @@ const SpendTrackerPage = ({ entry_id }) => {
     try {
       const response = await postSpend({ entry_id, spend });
       if (response.success) {
-        const newSpends = [
-          ...spends,
-          { ...spend, _id: response.data.spend_id },
-        ];
-        setSpends(newSpends);
+        setSpends([...spends, { ...response.data.spend }]);
       }
       stopSpendLoading({ callback: () => handleClose() });
     } catch (error) {
@@ -293,7 +289,7 @@ const SpendTrackerPage = ({ entry_id }) => {
             Collab
           </Button>
         </Stack>
-        {fetchSpendLoading || people.length === 0 ? (
+        {fetchSpendLoading ? (
           <Loader times={1} height={150} />
         ) : (
           <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />

@@ -13,6 +13,7 @@ import {
 import React, { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import Currency from "./Currency";
+import { globalFormatWithLocalize } from "@/utils/DateUtils";
 
 const doPeopleMap = (people) => {
   let peopleMap = {};
@@ -78,13 +79,7 @@ function SpendTable({ spends, people, onEdit }) {
                 </Stack>
               </TableCell>
               <TableCell>
-                {new Date(spend.created_at).toLocaleString(undefined, {
-                  year: "2-digit",
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {globalFormatWithLocalize(spend.created_at)}
               </TableCell>
               <TableCell align="center">
                 <IconButton

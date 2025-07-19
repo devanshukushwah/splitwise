@@ -8,4 +8,14 @@ const getCurrentUTCDateTimeLocal = () => {
   return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
 };
 
-export { getCurrentUTCDateTimeLocal };
+function globalFormatWithLocalize(argDate) {
+  return new Date(argDate).toLocaleString(undefined, {
+    year: "2-digit",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+export { getCurrentUTCDateTimeLocal, globalFormatWithLocalize };

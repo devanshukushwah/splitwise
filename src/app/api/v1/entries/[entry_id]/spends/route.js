@@ -78,12 +78,13 @@ export const POST = withAuth(async (request, { params }) => {
     entry_id,
     spend_by,
     spend_for,
-    created_at: new Date(),
+    created_at: new Date().toISOString(), // stored as ISO 8601 UTC
   };
+
   const result = await collection.insertOne(newSpend);
 
   return new Response(
-    JSON.stringify({ success: true, data: { spend_id: result.insertedId } }),
+    JSON.stringify({ success: true, data: { spend: newSpend } }),
     {
       headers: { "Content-Type": "application/json" },
       status: 201,

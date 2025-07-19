@@ -209,7 +209,7 @@ function SpendDialog({
               All
             </Button>
           </Stack>
-          <TextField
+          {/* <TextField
             size="small"
             label="Time"
             name="created_at"
@@ -219,7 +219,7 @@ function SpendDialog({
             InputLabelProps={{ shrink: true }}
             value={spend?.created_at}
             onChange={handleChange}
-          />
+          /> */}
         </Stack>
       </DialogContent>
       <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
