@@ -22,7 +22,7 @@ const defaultValue = () => ({
   amount: "",
   spend_by: "",
   spend_for: [],
-  created_at: getCurrentUTCDateTimeLocal(),
+  // created_at: getCurrentUTCDateTimeLocal(),
 });
 
 function SpendDialog({
@@ -51,7 +51,6 @@ function SpendDialog({
     if (item) {
       setSpend({
         ...item,
-        created_at: getCurrentUTCDateTimeLocal(),
       });
     } else {
       setSpend(defaultValue());
