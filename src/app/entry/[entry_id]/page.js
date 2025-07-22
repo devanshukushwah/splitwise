@@ -46,13 +46,15 @@ import PeopleDialog from "@/components/PeopleDialog";
 import { deletePeople, getPeople, postPeople } from "@/api/people";
 import { getSpends, postSpend, putSpend } from "@/api/spend";
 import Breadcrumb from "@/components/Breadcrumb";
-import { useApiState } from "@/context/ApiStateContext";
+import { useApiDispatch, useApiState } from "@/context/ApiStateContext";
 import Loader from "@/components/Loader";
 import GroupsIcon from "@mui/icons-material/Groups";
 import CenteredErrorMessage from "@/components/CenteredErrorMessage";
+import { ApiContextType } from "@/common/ApiContextType";
 
 const SpendTrackerPage = ({ entry_id }) => {
-  const { people, setPeople, setDirpath } = useApiState();
+  const { people } = useApiState();
+  const dispatch = useApiDispatch();
 
   const [open, setOpen] = useState(false);
   const [shareDialog, setShareDialog] = useState(false);
@@ -63,6 +65,10 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [editSpend, setEditSpend] = useState(null);
   const [spendLoading, setSpendLoading] = useState(false);
   const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
+  const [fetchLoading, setFetchLoading] = useState({
+    spend: true,
+    people: true,
+  });
   const [report, setReport] = useState([]);
   const [appError, setAppError] = useState(null);
 
@@ -106,19 +112,19 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   const startFetchSpendLoading = () => {
-    setFetchSpendLoading(true);
+    setFetchLoading({ ...fetchLoading, spend: true });
   };
 
-  const stopFetchSpendLoading = ({
-    callback = () => {},
-    timeout = null,
-  } = {}) => {
-    setTimeout(() => {
-      setFetchSpendLoading(false);
-      if (typeof callback === "function") {
-        callback();
-      }
-    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
+  const stopFetchSpendLoading = () => {
+    setFetchLoading({ ...fetchLoading, spend: false });
+  };
+
+  const startFetchPeopleLoading = () => {
+    setFetchLoading({ ...fetchLoading, people: true });
+  };
+
+  const stopFetchPeopleLoading = () => {
+    setFetchLoading({ ...fetchLoading, people: false });
   };
 
   const handleAddSpend = async (spend) => {
@@ -202,17 +208,19 @@ const SpendTrackerPage = ({ entry_id }) => {
       },
     ];
 
-    setDirpath(links);
+    dispatch({ type: ApiContextType.UPDATE_DIR_PATH, value: links });
   };
 
   const fetchPeople = async () => {
+    startFetchPeopleLoading();
     try {
       const response = await getPeople({ entry_id });
       const people = response?.data?.people || [];
-      setPeople(people);
+      dispatch({ type: ApiContextType.UPDATE_PEOPLE, value: people });
     } catch (error) {
       console.error("Error fetching people:", error);
     }
+    stopFetchPeopleLoading();
   };
 
   useEffect(() => {
@@ -289,7 +297,7 @@ const SpendTrackerPage = ({ entry_id }) => {
             Collab
           </Button>
         </Stack>
-        {fetchSpendLoading ? (
+        {fetchLoading.people && fetchLoading.spend ? (
           <Loader times={1} height={150} />
         ) : (
           <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />

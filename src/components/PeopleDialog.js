@@ -26,7 +26,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import { AppConstants } from "@/common/AppConstants";
-import { useApiState } from "@/context/ApiStateContext";
+import { useApiDispatch, useApiState } from "@/context/ApiStateContext";
+import { ApiContextType } from "@/common/ApiContextType";
 
 const PeopleDialog = ({
   open,
@@ -36,7 +37,8 @@ const PeopleDialog = ({
   apiPostPeople,
   apiDeletePeople,
 }) => {
-  const { people, setPeople } = useApiState();
+  const { people } = useApiState();
+  const dispatch = useApiDispatch();
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [addPersonLoading, setAddPersonLoading] = useState(false);
@@ -89,7 +91,10 @@ const PeopleDialog = ({
           callback: () => {
             const newPerson = response?.data?.person;
             if (newPerson) {
-              setPeople([...people, newPerson]);
+              dispatch({
+                type: ApiContextType.UPDATE_PEOPLE,
+                value: [...people, newPerson],
+              });
             }
           },
         });
@@ -106,7 +111,7 @@ const PeopleDialog = ({
     try {
       const response = await apiGetPeople({ entry_id });
       const people = response?.data?.people || [];
-      setPeople(people);
+      dispatch({ type: ApiContextType.UPDATE_PEOPLE, value: people });
     } catch (error) {
       console.error("Error fetching people:", error);
     }
@@ -122,7 +127,7 @@ const PeopleDialog = ({
           }
           return item;
         });
-        setPeople(updatedPeople);
+        dispatch({ type: ApiContextType.UPDATE_PEOPLE, value: updatedPeople });
       }
     } catch (error) {
       console.error("Error deleting person:", error);
