@@ -51,9 +51,10 @@ import Loader from "@/components/Loader";
 import GroupsIcon from "@mui/icons-material/Groups";
 import CenteredErrorMessage from "@/components/CenteredErrorMessage";
 import { ApiContextType } from "@/common/ApiContextType";
+import LazyInvoke from "@/utils/LazyInvoke";
 
 const SpendTrackerPage = ({ entry_id }) => {
-  const { people } = useApiState();
+  const { people, loading } = useApiState();
   const dispatch = useApiDispatch();
 
   const [open, setOpen] = useState(false);
@@ -65,10 +66,6 @@ const SpendTrackerPage = ({ entry_id }) => {
   const [editSpend, setEditSpend] = useState(null);
   const [spendLoading, setSpendLoading] = useState(false);
   const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
-  const [fetchLoading, setFetchLoading] = useState({
-    spend: true,
-    people: true,
-  });
   const [report, setReport] = useState([]);
   const [appError, setAppError] = useState(null);
 
@@ -109,22 +106,6 @@ const SpendTrackerPage = ({ entry_id }) => {
         callback();
       }
     }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
-  };
-
-  const startFetchSpendLoading = () => {
-    setFetchLoading({ ...fetchLoading, spend: true });
-  };
-
-  const stopFetchSpendLoading = () => {
-    setFetchLoading({ ...fetchLoading, spend: false });
-  };
-
-  const startFetchPeopleLoading = () => {
-    setFetchLoading({ ...fetchLoading, people: true });
-  };
-
-  const stopFetchPeopleLoading = () => {
-    setFetchLoading({ ...fetchLoading, people: false });
   };
 
   const handleAddSpend = async (spend) => {
@@ -181,19 +162,22 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   const fetchSpends = async () => {
-    startFetchSpendLoading();
+    dispatch({ type: ApiContextType.START_FETCH_SPEND_LOADING });
     try {
       const response = await getSpends({ entry_id });
       const spends = response?.data?.spends || [];
       setSpends(spends);
       constructDirectory(response?.data?.entry);
-      stopFetchSpendLoading();
     } catch (error) {
       console.error("Error fetching spends:", error);
       if (error?.response?.data?.isAppError) {
         setAppError({ message: error?.response?.data?.error });
       }
     }
+    LazyInvoke({
+      callback: () =>
+        dispatch({ type: ApiContextType.STOP_FETCH_SPEND_LOADING }),
+    });
   };
 
   const constructDirectory = (entry) => {
@@ -212,7 +196,7 @@ const SpendTrackerPage = ({ entry_id }) => {
   };
 
   const fetchPeople = async () => {
-    startFetchPeopleLoading();
+    dispatch({ type: ApiContextType.START_FETCH_PEOPLE_LOADING });
     try {
       const response = await getPeople({ entry_id });
       const people = response?.data?.people || [];
@@ -220,7 +204,11 @@ const SpendTrackerPage = ({ entry_id }) => {
     } catch (error) {
       console.error("Error fetching people:", error);
     }
-    stopFetchPeopleLoading();
+
+    LazyInvoke({
+      callback: () =>
+        dispatch({ type: ApiContextType.STOP_FETCH_PEOPLE_LOADING }),
+    });
   };
 
   useEffect(() => {
@@ -297,7 +285,7 @@ const SpendTrackerPage = ({ entry_id }) => {
             Collab
           </Button>
         </Stack>
-        {fetchLoading.people && fetchLoading.spend ? (
+        {loading?.fetchSpend || loading?.fetchPeople ? (
           <Loader times={1} height={150} />
         ) : (
           <SpendTable spends={spends} people={people} onEdit={handleEditOpen} />

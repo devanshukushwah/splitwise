@@ -3,7 +3,14 @@
 import { ApiContextType } from "@/common/ApiContextType";
 import { createContext, useReducer, useContext } from "react";
 
-const initialState = { dirPath: [], people: [] };
+const initialState = {
+  dirPath: [],
+  people: [],
+  loading: {
+    fetchSpend: false,
+    fetchPeople: false,
+  },
+};
 
 function apiReducer(state, action) {
   switch (action.type) {
@@ -11,6 +18,14 @@ function apiReducer(state, action) {
       return { ...state, people: action.value };
     case ApiContextType.UPDATE_DIR_PATH:
       return { ...state, dirPath: action.value };
+    case ApiContextType.START_FETCH_PEOPLE_LOADING:
+      return { ...state, loading: { ...state.loading, fetchPeople: true } };
+    case ApiContextType.STOP_FETCH_PEOPLE_LOADING:
+      return { ...state, loading: { ...state.loading, fetchPeople: false } };
+    case ApiContextType.START_FETCH_SPEND_LOADING:
+      return { ...state, loading: { ...state.loading, fetchSpend: true } };
+    case ApiContextType.STOP_FETCH_SPEND_LOADING:
+      return { ...state, loading: { ...state.loading, fetchSpend: false } };
     default:
       throw new Error(`Unhandled action: ${action.type}`);
   }
