@@ -7,4 +7,5 @@ export const AppConstants = {
   OFFLINE: "offline",
   PEOPLE_OFFLINE: "people_offline",
   SPENDS_OFFLINE: "spends_offline",
+  GAP: 2,
 };

@@ -76,7 +76,7 @@ export default function LoginPage() {
         </Typography>
 
         <form onSubmit={handleLogin}>
-          <Box display="flex" flexDirection="column" gap={3}>
+          <Box display="flex" flexDirection="column" gap={AppConstants.GAP}>
             <TextField
               label="Email"
               type="email"

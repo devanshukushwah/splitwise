@@ -28,6 +28,11 @@ import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import { AppConstants } from "@/common/AppConstants";
 import { useApiDispatch, useApiState } from "@/context/ApiStateContext";
 import { ApiContextType } from "@/common/ApiContextType";
+import DialogTemplate from "./DialogTemplate";
+
+const defaultValue = () => ({
+  email: "",
+});
 
 const PeopleDialog = ({
   open,
@@ -39,7 +44,7 @@ const PeopleDialog = ({
 }) => {
   const { people } = useApiState();
   const dispatch = useApiDispatch();
-  const [name, setName] = useState("");
+  const [person, setPerson] = useState(defaultValue);
   const [error, setError] = useState("");
   const [addPersonLoading, setAddPersonLoading] = useState(false);
 
@@ -65,21 +70,21 @@ const PeopleDialog = ({
   };
 
   const handleSubmit = () => {
-    const findPeople = people.find((person) => person.name === name);
+    const findPeople = people.find((item) => item.email === person.email);
 
     if (findPeople?.isDeleted === true) {
-      setError("This name was added earlier");
+      setError("This person was added earlier");
       return;
     }
 
     if (findPeople) {
-      setError("This name is already added");
+      setError("This person is already added");
       return;
     }
 
     setError("");
-    handlePersonSubmit({ name });
-    setName("");
+    handlePersonSubmit(person);
+    setPerson(defaultValue());
   };
 
   const handlePersonSubmit = async (person) => {
@@ -141,92 +146,72 @@ const PeopleDialog = ({
   }, [open]);
 
   return (
-    <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
-      <DialogTitle
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          px: 3,
-          py: 2,
-          borderBottom: 1,
-          borderColor: "divider",
-        }}
-      >
-        <Typography variant="h6" fontWeight={600}>
-          Person
-        </Typography>
-        <Button
-          onClick={handleClose}
-          sx={{ minWidth: 0, color: "grey.600" }}
-          aria-label="close"
-        >
-          <CloseIcon />
-        </Button>
-      </DialogTitle>
-
-      <DialogContent>
-        <Stack spacing={2} sx={{ mt: 2 }}>
-          <Stack direction="row" spacing={2} alignItems="flex-end">
-            <TextField
-              autoFocus
-              label="Name"
-              fullWidth
-              variant="outlined"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-                if (error) setError("");
-              }}
-              placeholder="Enter person name"
-              error={!!error}
-              helperText={error}
-              size="small"
-            />
-            <Button
-              onClick={handleSubmit}
-              variant="contained"
-              startIcon={<AddIcon />}
-              sx={{ height: 40, minWidth: 100 }}
-              loading={addPersonLoading}
-            >
-              Add
-            </Button>
-          </Stack>
-          <Divider />
-          <Typography variant="subtitle2" color="text.secondary" mb={1}>
-            People List
-          </Typography>
-          <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
-            {people?.filter((item) => item?.isDeleted !== true).length === 0 ? (
-              <Typography variant="body2" color="text.disabled">
-                No people yet.
-              </Typography>
-            ) : (
-              people
-                ?.filter((item) => item?.isDeleted !== true)
-                ?.map((person) => (
-                  <Tooltip
-                    key={person._id}
-                    title={`Added by ${person.created_by} on ${new Date(
-                      person.created_at
-                    ).toLocaleDateString()}`}
-                    arrow
-                    enterDelay={500}
-                    leaveDelay={200}
-                  >
-                    <Chip
-                      label={person.name}
-                      variant="outlined"
-                      onDelete={() => handleDelete(person)}
-                    />
-                  </Tooltip>
-                ))
-            )}
-          </Stack>
+    <DialogTemplate
+      isOpen={open}
+      onClose={handleClose}
+      title="Person"
+      disableActions
+    >
+      <Stack spacing={2} sx={{ mt: 2 }}>
+        <Stack direction="row" spacing={2} alignItems="flex-end">
+          <TextField
+            autoFocus
+            label="Email"
+            fullWidth
+            variant="outlined"
+            value={person.email}
+            onChange={(e) => {
+              setPerson({ email: e.target.value });
+              if (error) setError("");
+            }}
+            placeholder="Enter person email"
+            error={!!error}
+            helperText={error}
+            size="small"
+          />
+          <Button
+            onClick={handleSubmit}
+            variant="contained"
+            startIcon={<AddIcon />}
+            sx={{ height: 40, minWidth: 100 }}
+            loading={addPersonLoading}
+          >
+            Add
+          </Button>
         </Stack>
-      </DialogContent>
-    </Dialog>
+        <Divider />
+        <Typography variant="subtitle2" color="text.secondary" mb={1}>
+          People List
+        </Typography>
+        <Stack direction="row" flexWrap="wrap" sx={{ gap: 1 }}>
+          {people?.filter((item) => item?.isDeleted !== true).length === 0 ? (
+            <Typography variant="body2" color="text.disabled">
+              No people yet.
+            </Typography>
+          ) : (
+            people
+              ?.filter((item) => item?.isDeleted !== true)
+              ?.map((person) => (
+                <Tooltip
+                  key={person._id}
+                  title={`Added by ${person.created_by} on ${new Date(
+                    person.created_at
+                  ).toLocaleDateString()}`}
+                  arrow
+                  enterDelay={500}
+                  leaveDelay={200}
+                >
+                  <Chip
+                    label={`${person?.user?.firstName}`}
+                    variant="outlined"
+                    onDelete={() => handleDelete(person)}
+                  />
+                </Tooltip>
+              ))
+          )}
+        </Stack>
+      </Stack>
+    </DialogTemplate>
   );
 };
 

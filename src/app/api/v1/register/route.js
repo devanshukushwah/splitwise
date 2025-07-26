@@ -4,7 +4,7 @@ import { AppConstants } from "@/common/AppConstants";
 import clientPromise from "@/lib/mongodb";
 
 export async function POST(req) {
-  const { email, password } = await req.json();
+  const { email, password, firstName, lastName } = await req.json();
 
   if (!email || !password) {
     return new Response(JSON.stringify({ error: "invalid data" }), {
@@ -31,17 +31,20 @@ export async function POST(req) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const result = await collection.insertOne({
+  let user = {
     email: email.toLowerCase(),
     password: hashedPassword,
-  });
+    firstName,
+    lastName,
+  };
+
+  const result = await collection.insertOne(user);
 
   if (result.insertedId) {
     return NextResponse.json({
       message: "User registered",
       success: true,
       status: 201,
-      userId: result.insertedId,
     });
   } else {
     return new Response(

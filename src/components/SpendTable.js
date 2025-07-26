@@ -14,22 +14,10 @@ import React, { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import Currency from "./Currency";
 import { globalFormatWithLocalize } from "@/utils/DateUtils";
-
-const doPeopleMap = (people) => {
-  let peopleMap = {};
-  for (let obj of people) {
-    peopleMap[obj._id] = obj.name;
-  }
-
-  return peopleMap;
-};
+import { useApiState } from "@/context/ApiStateContext";
 
 function SpendTable({ spends, people, onEdit }) {
-  const [peopleMap, setPeopleMap] = useState(doPeopleMap(people || []));
-
-  useEffect(() => {
-    setPeopleMap(doPeopleMap(people || []));
-  }, [people]);
+  const { peopleMap } = useApiState();
 
   return (
     <TableContainer component={Paper} sx={{ marginTop: 4, boxShadow: 3 }}>

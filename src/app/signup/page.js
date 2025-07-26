@@ -9,12 +9,16 @@ import {
   Container,
   Paper,
   Alert,
+  Stack,
 } from "@mui/material";
 import axios from "axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import { AppConstants } from "@/common/AppConstants";
+import App from "next/app";
 
 export default function LoginPage() {
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -31,15 +35,14 @@ export default function LoginPage() {
       if (typeof callback === "function") {
         callback();
       }
-    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING); // Simulate a delay for loading state
+    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING);
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Basic validation
-    if (!email || !password || !confirmPassword) {
-      setError("Please enter both email and password.");
+    if (!firstName || !lastName || !email || !password || !confirmPassword) {
+      setError("Please fill in all required fields.");
       return;
     }
 
@@ -50,8 +53,10 @@ export default function LoginPage() {
 
     try {
       startLoading();
-      const response = await axios
+      await axios
         .post(HttpUrlConfig.getRegisterUrl(), {
+          firstName,
+          lastName,
           email,
           password,
         })
@@ -60,17 +65,16 @@ export default function LoginPage() {
             stopLoading({ callback: () => (window.location.href = "/login") });
           } else {
             setError(response.data.error || "Registration failed.");
-            stopLoading({ timeout: 0 }); // Stop loading state immediately
+            stopLoading({ timeout: 0 });
           }
         });
-      setError(""); // Clear any previous error
+      setError("");
     } catch (err) {
-      if (err.response) {
-        setError(err.response.data.error);
-      } else {
-        setError("An error occurred while logging in. Please try again.");
-      }
-      stopLoading({ timeout: 0 }); // Stop loading state immediately
+      setError(
+        err.response?.data?.error ||
+          "An error occurred while registering. Please try again."
+      );
+      stopLoading({ timeout: 0 });
     }
   };
 
@@ -82,7 +86,23 @@ export default function LoginPage() {
         </Typography>
 
         <form onSubmit={handleLogin}>
-          <Box display="flex" flexDirection="column" gap={3}>
+          <Box display="flex" flexDirection="column" gap={AppConstants.GAP}>
+            <Stack direction="row" gap={AppConstants.GAP}>
+              <TextField
+                label="First Name"
+                fullWidth
+                required
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+              <TextField
+                label="Last Name"
+                fullWidth
+                required
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </Stack>
             <TextField
               label="Email"
               type="email"
@@ -119,10 +139,11 @@ export default function LoginPage() {
               variant="contained"
               color="primary"
               fullWidth
-              loading={loading}
+              disabled={loading}
             >
               Register
             </Button>
+
             <Typography variant="body2" align="center" sx={{ mt: 2 }}>
               Already have an account?&nbsp;
               <a

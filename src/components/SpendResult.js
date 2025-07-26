@@ -2,6 +2,7 @@ import { Divider, List, ListItem, ListItemText, Stack } from "@mui/material";
 import React from "react";
 import { Tabs, Tab, Box, Typography } from "@mui/material";
 import Currency from "./Currency";
+import { useApiState } from "@/context/ApiStateContext";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -40,7 +41,9 @@ const style = {
   backgroundColor: "background.paper",
 };
 
-function ShowResultBox({ list, peopleMap }) {
+function ShowResultBox({ list }) {
+  const { peopleMap } = useApiState();
+
   if (!list || list.length === 0) {
     return <Typography>No transactions to show</Typography>;
   }
@@ -77,12 +80,6 @@ function SpendResult({ data, people }) {
     setValue(newValue);
   };
 
-  // group name based on person_id
-  let peopleMap = {};
-  for (let obj of people) {
-    peopleMap[obj._id] = obj.name;
-  }
-
   return (
     <Box sx={{ width: "100%" }}>
       <Tabs
@@ -94,13 +91,10 @@ function SpendResult({ data, people }) {
         <Tab label="All Transactions" {...a11yProps(1)} />
       </Tabs>
       <TabPanel value={value} index={0}>
-        <ShowResultBox
-          list={data.optimizedTransactions || []}
-          peopleMap={peopleMap}
-        />
+        <ShowResultBox list={data.optimizedTransactions || []} />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        <ShowResultBox list={data.transactions || []} peopleMap={peopleMap} />
+        <ShowResultBox list={data.transactions || []} />
       </TabPanel>
     </Box>
   );
