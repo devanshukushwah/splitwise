@@ -41,7 +41,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import CollabDialog from "@/components/CollabDialog";
 import SpendTable from "@/components/SpendTable";
 import { Label, People } from "@mui/icons-material";
-import PeopleDialog from "@/components/PeopleDialog2";
+import PeopleDialog from "@/components/PeopleDialog";
 
 import { deletePeople, getPeople, postPeople } from "@/api/people";
 import { getSpends, postSpend, putSpend } from "@/api/spend";
