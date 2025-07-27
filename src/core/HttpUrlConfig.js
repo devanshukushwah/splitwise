@@ -23,18 +23,6 @@ export class HttpUrlConfig {
     return `${this.getBaseUrl()}/entries/${entry_id}/people/${person_id}`;
   }
 
-  static getSharesUrl(entry_id) {
-    return `${this.getBaseUrl()}/entries/${entry_id}/shares`;
-  }
-
-  static deleteSharesUrl(entry_id) {
-    return `${this.getBaseUrl()}/entries/${entry_id}/shares`;
-  }
-
-  static postSharesUrl(entry_id) {
-    return `${this.getBaseUrl()}/entries/${entry_id}/shares`;
-  }
-
   static getEntriesUrl() {
     return `${this.getBaseUrl()}/entries`;
   }

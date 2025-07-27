@@ -7,8 +7,9 @@ export const DELETE = withAuth(async (request, { params }) => {
   const client = await clientPromise;
   const db = client.db();
   const collection = db.collection(AppConstants.PEOPLE);
+  const entryCollection = db.collection(AppConstants.ENTRIES);
 
-  const { person_id } = params;
+  const { person_id, entry_id } = params;
 
   if (!person_id) {
     return new Response(JSON.stringify({ error: "invalid data" }), {
@@ -30,6 +31,11 @@ export const DELETE = withAuth(async (request, { params }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  const entryResult = await entryCollection.updateOne(
+    { _id: new ObjectId(entry_id) },
+    { $pull: { shares: { email: email.toLowerCase() } } }
+  );
 
   return new Response(
     JSON.stringify({ success: true, message: "person deleted successfully" }),

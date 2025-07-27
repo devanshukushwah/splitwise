@@ -38,7 +38,6 @@ import SpendDialog from "@/components/SpendDialog";
 import api from "@/lib/axios";
 import { HttpUrlConfig } from "@/core/HttpUrlConfig";
 import ShareIcon from "@mui/icons-material/Share";
-import CollabDialog from "@/components/CollabDialog";
 import SpendTable from "@/components/SpendTable";
 import { Label, People } from "@mui/icons-material";
 import PeopleDialog from "@/components/PeopleDialog";
@@ -58,24 +57,14 @@ const SpendTrackerPage = ({ entry_id }) => {
   const dispatch = useApiDispatch();
 
   const [open, setOpen] = useState(false);
-  const [shareDialog, setShareDialog] = useState(false);
   const [editDialog, setEditDialog] = useState(false);
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
-  const [peopleMap, setPeopleMap] = useState({});
   const [spends, setSpends] = useState([]);
   const [editSpend, setEditSpend] = useState(null);
   const [spendLoading, setSpendLoading] = useState(false);
   const [fetchSpendLoading, setFetchSpendLoading] = useState(true);
   const [report, setReport] = useState([]);
   const [appError, setAppError] = useState(null);
-
-  useEffect(() => {
-    let peopleMap = {};
-    for (let obj of people) {
-      peopleMap[obj._id] = obj.name;
-    }
-    setPeopleMap(peopleMap);
-  }, [people]);
 
   const handleOpen = () => {
     setOpen(true);
@@ -157,10 +146,6 @@ const SpendTrackerPage = ({ entry_id }) => {
     setReport(newReport);
   }, [spends, people]);
 
-  const getPersonNames = (spendFor) => {
-    return spendFor?.map((id) => peopleMap[id] || "Unknown").join(", ");
-  };
-
   const fetchSpends = async () => {
     dispatch({ type: ApiContextType.START_FETCH_SPEND_LOADING });
     try {
@@ -216,24 +201,22 @@ const SpendTrackerPage = ({ entry_id }) => {
     fetchPeople();
   }, []);
 
-  const handleShareClose = () => {
-    setShareDialog(false);
-  };
-
   if (appError) {
     return <CenteredErrorMessage message={appError?.message} />;
   }
 
   return (
     <>
-      <PeopleDialog
-        open={openPersonDialog}
-        onClose={handleCloseAddPerson}
-        entry_id={entry_id}
-        apiDeletePeople={deletePeople}
-        apiGetPeople={getPeople}
-        apiPostPeople={postPeople}
-      />
+      {openPersonDialog && (
+        <PeopleDialog
+          open={openPersonDialog}
+          onClose={handleCloseAddPerson}
+          entry_id={entry_id}
+          apiDeletePeople={deletePeople}
+          apiGetPeople={getPeople}
+          apiPostPeople={postPeople}
+        />
+      )}
       {open && (
         <SpendDialog
           open={open}
@@ -253,11 +236,6 @@ const SpendTrackerPage = ({ entry_id }) => {
           loading={spendLoading}
         />
       )}
-      <CollabDialog
-        open={shareDialog}
-        onClose={handleShareClose}
-        entry_id={entry_id}
-      />
 
       <Box>
         <Stack direction="row" spacing={2} mb={3}>
@@ -276,13 +254,6 @@ const SpendTrackerPage = ({ entry_id }) => {
             color="secondary"
           >
             Add Spend
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<GroupsIcon />}
-            onClick={() => setShareDialog(true)}
-          >
-            Collab
           </Button>
         </Stack>
         {loading?.fetchSpend || loading?.fetchPeople ? (

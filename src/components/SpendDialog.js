@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
+import { displayPersonName } from "@/utils/PersonUtils";
 
 const defaultValue = () => ({
   title: "",
@@ -126,7 +127,7 @@ function SpendDialog({
               ?.filter((item) => item?.isDeleted !== true)
               ?.map((person) => (
                 <MenuItem key={person._id} value={person._id}>
-                  <ListItemText primary={person.name} />
+                  <ListItemText primary={displayPersonName(person)} />
                 </MenuItem>
               ))}
           </TextField>
@@ -142,7 +143,7 @@ function SpendDialog({
                 renderValue: (selected) =>
                   people
                     .filter((p) => selected.includes(p._id))
-                    .map((p) => p.name)
+                    .map((p) => displayPersonName(p))
                     .join(", "),
               }}
               variant="outlined"
@@ -161,7 +162,7 @@ function SpendDialog({
                     <Checkbox
                       checked={spend?.spend_for?.includes(person._id) || false}
                     />
-                    <ListItemText primary={person.name} />
+                    <ListItemText primary={displayPersonName(person)} />
                   </MenuItem>
                 ))}
               {people
@@ -186,7 +187,7 @@ function SpendDialog({
                           spend?.spend_for?.includes(person._id) || false
                         }
                       />
-                      <ListItemText primary={person.name} />
+                      <ListItemText primary={displayPersonName(person)} />
                     </Box>
                     <Typography
                       variant="caption"

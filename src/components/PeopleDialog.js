@@ -29,6 +29,8 @@ import { AppConstants } from "@/common/AppConstants";
 import { useApiDispatch, useApiState } from "@/context/ApiStateContext";
 import { ApiContextType } from "@/common/ApiContextType";
 import DialogTemplate from "./DialogTemplate";
+import { displayPersonName } from "@/utils/PersonUtils";
+import { isValidEmail } from "@/utils/AppUtils";
 
 const defaultValue = () => ({
   email: "",
@@ -66,10 +68,14 @@ const PeopleDialog = ({
 
   const handleClose = () => {
     onClose();
-    setName("");
   };
 
   const handleSubmit = () => {
+    if (!isValidEmail(person.email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
     const findPeople = people.find((item) => item.email === person.email);
 
     if (findPeople?.isDeleted === true) {
@@ -153,7 +159,7 @@ const PeopleDialog = ({
       disableActions
     >
       <Stack spacing={2} sx={{ mt: 2 }}>
-        <Stack direction="row" spacing={2} alignItems="flex-end">
+        <Stack direction="row" spacing={2} alignItems="flex-start">
           <TextField
             autoFocus
             label="Email"
@@ -202,7 +208,7 @@ const PeopleDialog = ({
                   leaveDelay={200}
                 >
                   <Chip
-                    label={`${person?.user?.firstName}`}
+                    label={`${displayPersonName(person)}`}
                     variant="outlined"
                     onDelete={() => handleDelete(person)}
                   />

@@ -49,7 +49,7 @@ function SpendTable({ spends, people, onEdit }) {
               </TableCell>
               <TableCell>
                 <Chip
-                  label={peopleMap[spend.spend_by] || "Unknown"}
+                  label={peopleMap[spend.spend_by] || "NA"}
                   variant="outlined"
                   size="small"
                 />
@@ -59,7 +59,7 @@ function SpendTable({ spends, people, onEdit }) {
                   {spend?.spend_for?.map((person_id) => (
                     <Chip
                       key={person_id}
-                      label={peopleMap[person_id] || "Unknown"}
+                      label={peopleMap[person_id] || "NA"}
                       variant="outlined"
                       size="small"
                     />

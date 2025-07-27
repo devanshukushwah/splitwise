@@ -1,6 +1,7 @@
 import { AppConstants } from "@/common/AppConstants";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
+import { ObjectId } from "mongodb";
 
 export const GET = withAuth(async (request, { params }) => {
   const client = await clientPromise;
@@ -49,6 +50,7 @@ export const POST = withAuth(async (request, { params }) => {
   const db = client.db(); // default DB from connection string
   const peopleCollection = db.collection(AppConstants.PEOPLE);
   const userCollection = db.collection(AppConstants.USERS);
+  const entryCollection = db.collection(AppConstants.ENTRIES);
 
   const data = await request.json();
   const { email } = data;
@@ -64,7 +66,7 @@ export const POST = withAuth(async (request, { params }) => {
 
   // Check if the person already exists
   const existingPerson = await peopleCollection.findOne({
-    email,
+    email: email.toLowerCase(),
     entry_id,
   });
 
@@ -79,7 +81,7 @@ export const POST = withAuth(async (request, { params }) => {
   }
 
   let newPerson = {
-    email,
+    email: email.toLowerCase(),
     entry_id,
     created_at: new Date(),
     created_by: loggedInEmail,
@@ -90,10 +92,22 @@ export const POST = withAuth(async (request, { params }) => {
 
   if (result.insertedId) {
     const user = await userCollection.findOne(
-      { email },
+      { email: email.toLowerCase() },
       { projection: { firstName: 1, lastName: 1, email: 1 } }
     );
     newPerson.user = user;
+
+    // Add to entry shares for collaboration
+    const newShare = {
+      email: email.toLowerCase(),
+      created_at: new Date(),
+      created_by: loggedInEmail,
+    };
+
+    const entryResult = await entryCollection.updateOne(
+      { _id: new ObjectId(entry_id) },
+      { $push: { shares: newShare } }
+    );
   }
 
   return new Response(
