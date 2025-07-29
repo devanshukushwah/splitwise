@@ -9,7 +9,7 @@ export const GET = withAuth(async (request, { params }) => {
   const spendCollection = db.collection(AppConstants.SPENDS);
   const entryCollection = db.collection(AppConstants.ENTRIES);
 
-  const { email } = request.user;
+  const user = request.user;
   const { entry_id } = await params;
 
   const entry = await entryCollection.findOne(
@@ -21,8 +21,8 @@ export const GET = withAuth(async (request, { params }) => {
 
   // Check if logged in email matches created_by or any shares.email
   const isCreatorOrShared =
-    entry.created_by === email ||
-    entry.shares.some((share) => share.email === email);
+    entry.created_by.equals(user._id) ||
+    entry?.shares?.some((share) => share.userId.equals(user._id));
 
   if (!isCreatorOrShared) {
     return new Response(
@@ -61,7 +61,7 @@ export const POST = withAuth(async (request, { params }) => {
 
   const data = await request.json();
   const { title, amount, spend_by, spend_for } = data;
-  const { email } = request.user;
+  const user = request.user;
   const { entry_id } = await params;
 
   if (!title || !amount) {
@@ -74,7 +74,7 @@ export const POST = withAuth(async (request, { params }) => {
   const newSpend = {
     title,
     amount,
-    created_by: email,
+    created_by: new ObjectId(user._id),
     entry_id,
     spend_by,
     spend_for,

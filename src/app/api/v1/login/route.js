@@ -36,7 +36,9 @@ export async function POST(req) {
     );
   }
 
-  const token = jwt.sign({ email }, SECRET);
+  const payload = { _id: user._id, email };
+
+  const token = jwt.sign(payload, SECRET);
 
   return NextResponse.json({ token, success: true });
 }

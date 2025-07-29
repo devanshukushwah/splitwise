@@ -17,17 +17,17 @@ export const GET = withAuth(async (request, { params }) => {
     .toArray();
 
   if (people) {
-    const peopleEmails = people.map((person) => person.email);
+    const peopleUserIds = people.map((person) => new ObjectId(person.userId));
     const users = await userCollection
       .find(
-        { email: { $in: peopleEmails } },
+        { _id: { $in: peopleUserIds } },
         { projection: { firstName: 1, lastName: 1, email: 1 } }
       )
       .toArray();
 
     // Group by email (one user per email)
-    const groupedByEmail = users.reduce((acc, user) => {
-      acc[user.email] = user;
+    const groupedByUserId = users.reduce((acc, user) => {
+      acc[user._id] = user;
       return acc;
     }, {});
 
@@ -35,7 +35,7 @@ export const GET = withAuth(async (request, { params }) => {
     people = people.map((person) => {
       return {
         ...person,
-        user: groupedByEmail[person.email],
+        user: groupedByUserId[person.userId],
       };
     });
   }
@@ -54,7 +54,7 @@ export const POST = withAuth(async (request, { params }) => {
 
   const data = await request.json();
   const { email } = data;
-  const { email: loggedInEmail } = request.user;
+  const user = request.user;
   const { entry_id } = await params;
 
   if (!email || !entry_id) {
@@ -80,28 +80,28 @@ export const POST = withAuth(async (request, { params }) => {
     );
   }
 
+  const peopleUser = await userCollection.findOne(
+    { email: email.toLowerCase() },
+    { projection: { firstName: 1, lastName: 1, email: 1 } }
+  );
+
   let newPerson = {
-    email: email.toLowerCase(),
+    userId: peopleUser._id,
     entry_id,
     created_at: new Date(),
-    created_by: loggedInEmail,
+    created_by: new ObjectId(user._id),
   };
   const result = await peopleCollection.insertOne(newPerson);
 
   newPerson._id = result.insertedId;
+  newPerson.user = peopleUser;
 
   if (result.insertedId) {
-    const user = await userCollection.findOne(
-      { email: email.toLowerCase() },
-      { projection: { firstName: 1, lastName: 1, email: 1 } }
-    );
-    newPerson.user = user;
-
     // Add to entry shares for collaboration
     const newShare = {
-      email: email.toLowerCase(),
+      userId: peopleUser._id,
       created_at: new Date(),
-      created_by: loggedInEmail,
+      created_by: new ObjectId(user._id),
     };
 
     const entryResult = await entryCollection.updateOne(

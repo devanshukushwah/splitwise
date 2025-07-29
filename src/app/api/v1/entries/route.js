@@ -1,13 +1,15 @@
 import { AppConstants } from "@/common/AppConstants";
+import { addHistory } from "@/lib/historyService";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
+import { ObjectId } from "mongodb";
 
 export const GET = withAuth(async (request) => {
   const client = await clientPromise;
   const db = client.db(); // default DB from connection string
   const collection = db.collection(AppConstants.ENTRIES);
 
-  const { email } = request.user;
+  const user = request.user;
 
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get("limit"), 10);
@@ -16,7 +18,10 @@ export const GET = withAuth(async (request) => {
   const entries = await collection
     .find(
       {
-        $or: [{ created_by: email }, { "shares.email": email }],
+        $or: [
+          { created_by: new ObjectId(user._id) },
+          { "shares.email": new ObjectId(user._id) },
+        ],
       },
       {
         projection: { shares: 0 },
@@ -39,7 +44,7 @@ export const POST = withAuth(async (request) => {
 
   const data = await request.json();
   const { title } = data;
-  const { email } = request.user;
+  const user = request.user;
 
   if (!title) {
     return new Response(JSON.stringify({ error: "invalid data" }), {
@@ -48,10 +53,16 @@ export const POST = withAuth(async (request) => {
     });
   }
 
-  let newEntry = { title, created_by: email, created_at: new Date() };
+  let newEntry = {
+    title,
+    created_by: new ObjectId(user._id),
+    created_at: new Date(),
+  };
   const result = await collection.insertOne(newEntry);
 
   newEntry._id = result.insertedId;
+
+  // addHistory(null, newEntry, AppConstants.ENTRIES, request.user);
 
   return new Response(
     JSON.stringify({
