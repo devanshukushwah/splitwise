@@ -12,7 +12,7 @@ export function guessNameFromEmail(email) {
     ?.trim()
     ?.split(/\s+/);
 
-  const capitalized = nameParts.map(
+  const capitalized = nameParts?.map(
     (part) => part?.charAt(0)?.toUpperCase() + part?.slice(1)?.toLowerCase()
   );
 
