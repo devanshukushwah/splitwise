@@ -18,6 +18,3 @@ export function guessNameFromEmail(email) {
 
   return capitalized.join(" ");
 }
-
-// Example
-console.log(guessNameFromEmail("jane.doe1990@gmail.com")); // Output: Jane Doe
