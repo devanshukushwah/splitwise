@@ -172,7 +172,7 @@ const SpendTrackerPage = ({ entry_id }) => {
         href: "/dashboard",
       },
       {
-        label: entry?.title,
+        label: entry.entryName || entry.title,
         isText: true,
       },
     ];

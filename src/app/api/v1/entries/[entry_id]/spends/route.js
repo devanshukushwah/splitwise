@@ -16,7 +16,7 @@ export const GET = withAuth(async (request, { params }) => {
   const entry = await entryCollection.findOne(
     { _id: new ObjectId(entry_id) },
     {
-      projection: { shares: 1, created_by: 1, title: 1 },
+      projection: { shares: 1, created_by: 1, title: 1, entryName: 1 },
     }
   );
 
@@ -47,7 +47,10 @@ export const GET = withAuth(async (request, { params }) => {
   return new Response(
     JSON.stringify({
       success: true,
-      data: { spends, entry: { title: entry.title } },
+      data: {
+        spends,
+        entry: { title: entry.title, entryName: entry.entryName },
+      },
     }),
     {
       headers: { "Content-Type": "application/json" },
