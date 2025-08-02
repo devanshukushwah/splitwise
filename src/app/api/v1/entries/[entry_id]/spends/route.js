@@ -1,4 +1,5 @@
 import { AppConstants } from "@/common/AppConstants";
+import { addHistory } from "@/lib/historyService";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
 import { ObjectId } from "mongodb";
@@ -82,6 +83,15 @@ export const POST = withAuth(async (request, { params }) => {
   };
 
   const result = await collection.insertOne(newSpend);
+
+  addHistory(
+    entry_id,
+    null,
+    newSpend,
+    AppConstants.POST,
+    AppConstants.SPENDS,
+    request.user
+  );
 
   return new Response(
     JSON.stringify({ success: true, data: { spend: newSpend } }),

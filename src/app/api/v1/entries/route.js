@@ -62,7 +62,14 @@ export const POST = withAuth(async (request) => {
 
   newEntry._id = result.insertedId;
 
-  // addHistory(null, newEntry, AppConstants.ENTRIES, request.user);
+  addHistory(
+    result.insertedId,
+    null,
+    newEntry,
+    AppConstants.POST,
+    AppConstants.ENTRIES,
+    request.user
+  );
 
   return new Response(
     JSON.stringify({

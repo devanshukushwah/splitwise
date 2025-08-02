@@ -1,4 +1,5 @@
 import { AppConstants } from "@/common/AppConstants";
+import { addHistory } from "@/lib/historyService";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
 import { ObjectId } from "mongodb";
@@ -6,7 +7,7 @@ import { ObjectId } from "mongodb";
 export const PUT = withAuth(async (request, { params }) => {
   const client = await clientPromise;
   const db = client.db();
-  const collection = db.collection(AppConstants.SPENDS);
+  const spendCollection = db.collection(AppConstants.SPENDS);
 
   const { entry_id, spend_id } = await params;
   const data = await request.json();
@@ -20,6 +21,11 @@ export const PUT = withAuth(async (request, { params }) => {
     });
   }
 
+  const oldSpend = await spendCollection.findOne({
+    _id: new ObjectId(spend_id),
+    entry_id,
+  });
+
   const updateFields = {
     title,
     amount,
@@ -29,7 +35,7 @@ export const PUT = withAuth(async (request, { params }) => {
     changed_by: email,
   };
 
-  const result = await collection.updateOne(
+  const result = await spendCollection.updateOne(
     { _id: new ObjectId(spend_id), entry_id },
     { $set: updateFields }
   );
@@ -40,6 +46,15 @@ export const PUT = withAuth(async (request, { params }) => {
       headers: { "Content-Type": "application/json" },
     });
   }
+
+  addHistory(
+    entry_id,
+    oldSpend,
+    updateFields,
+    AppConstants.PUT,
+    AppConstants.SPENDS,
+    request.user
+  );
 
   return new Response(
     JSON.stringify({ success: true, message: "spend updated successfully" }),

@@ -1,4 +1,5 @@
 import { AppConstants } from "@/common/AppConstants";
+import { addHistory } from "@/lib/historyService";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
 import { ObjectId } from "mongodb";
@@ -107,6 +108,15 @@ export const POST = withAuth(async (request, { params }) => {
     const entryResult = await entryCollection.updateOne(
       { _id: new ObjectId(entry_id) },
       { $push: { shares: newShare } }
+    );
+
+    addHistory(
+      entry_id,
+      null,
+      newPerson,
+      AppConstants.POST,
+      AppConstants.PEOPLE,
+      request.user
     );
   }
 

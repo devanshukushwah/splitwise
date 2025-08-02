@@ -1,4 +1,5 @@
 import { AppConstants } from "@/common/AppConstants";
+import { addHistory } from "@/lib/historyService";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
 import { ObjectId } from "mongodb";
@@ -35,6 +36,15 @@ export const DELETE = withAuth(async (request, { params }) => {
   const entryResult = await entryCollection.updateOne(
     { _id: new ObjectId(entry_id) },
     { $pull: { shares: { email: email.toLowerCase() } } }
+  );
+
+  addHistory(
+    entry_id,
+    { _id: new ObjectId(person_id) },
+    null,
+    AppConstants.DELETE,
+    AppConstants.PEOPLE,
+    request.user
   );
 
   return new Response(
