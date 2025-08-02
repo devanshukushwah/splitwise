@@ -53,7 +53,7 @@ export default function EntryList() {
   const handleAddEntry = () => {
     if (entryName.trim() === "") return;
     startAddEntryLoading();
-    const entry = { title: entryName.trim() };
+    const entry = { entryName: entryName.trim() };
     api
       .post(HttpUrlConfig.postEntryUrl(), entry)
       .then((response) => {
@@ -185,7 +185,9 @@ const Entries = ({ entries }) => {
                 justifyContent="space-between"
               >
                 <Box>
-                  <Typography variant="body1">{entry.title}</Typography>
+                  <Typography variant="body1">
+                    {entry.entryName || entry.title}
+                  </Typography>
                   {entry.created_at && (
                     <Typography variant="caption" color="text.secondary">
                       {globalFormatWithLocalize(entry.created_at)}

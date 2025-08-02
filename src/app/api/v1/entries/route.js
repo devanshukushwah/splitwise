@@ -43,10 +43,10 @@ export const POST = withAuth(async (request) => {
   const collection = db.collection(AppConstants.ENTRIES);
 
   const data = await request.json();
-  const { title } = data;
+  const { entryName } = data;
   const user = request.user;
 
-  if (!title) {
+  if (!entryName) {
     return new Response(JSON.stringify({ error: "invalid data" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
@@ -54,7 +54,7 @@ export const POST = withAuth(async (request) => {
   }
 
   let newEntry = {
-    title,
+    entryName,
     created_by: new ObjectId(user._id),
     created_at: new Date(),
   };
