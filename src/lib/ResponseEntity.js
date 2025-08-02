@@ -1,3 +1,3 @@
 export const responseOk = () => ({ success: true });
 
-export const responseOkWithData = (data) => ({ success: true, data });
+export const responseOkWithData = (data) => ({ success: true, data: data });

@@ -1,6 +1,6 @@
 import { AppConstants } from "@/common/AppConstants";
 import clientPromise from "@/lib/mongodb";
-import { responseOk } from "./ResponseEntity";
+import { responseOk, responseOkWithData } from "./ResponseEntity";
 import { ObjectId } from "mongodb";
 
 const methodTypes = {
@@ -94,7 +94,7 @@ export async function addHistory(
   const historyCollection = db.collection(AppConstants.HISTORY);
 
   let history = {
-    entryId,
+    entryId: new ObjectId(entryId),
     type: methodTypes[methodType] || "Unknown",
     created_by: new ObjectId(user._id),
     created_at: new Date(),
@@ -121,4 +121,17 @@ export async function addHistory(
   const result = await historyCollection.insertOne(history);
 
   return responseOk();
+}
+
+export async function getHistory(entryId) {
+  const client = await clientPromise;
+  const db = client.db(); // default DB from connection string
+  const historyCollection = db.collection(AppConstants.HISTORY);
+
+  const history = await historyCollection
+    .find({ entryId: new ObjectId(entryId) })
+    .sort({ created_at: -1 })
+    .toArray();
+
+  return responseOkWithData({ history });
 }
