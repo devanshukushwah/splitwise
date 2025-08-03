@@ -20,7 +20,7 @@ export const GET = withAuth(async (request) => {
       {
         $or: [
           { created_by: new ObjectId(user._id) },
-          { "shares.email": new ObjectId(user._id) },
+          { "shares.userId": new ObjectId(user._id) },
         ],
       },
       {
