@@ -35,6 +35,10 @@ export class HttpUrlConfig {
     return `${this.getBaseUrl()}/entries/${entry_id}/spends`;
   }
 
+  static getHistoryUrl(entry_id) {
+    return `${this.getBaseUrl()}/entries/${entry_id}/history`;
+  }
+
   static putSpendsUrl(entry_id, spend_id) {
     return `${this.getBaseUrl()}/entries/${entry_id}/spends/${spend_id}`;
   }

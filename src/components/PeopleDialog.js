@@ -158,7 +158,7 @@ const PeopleDialog = ({
       title="Person"
       disableActions
     >
-      <Stack spacing={2} sx={{ mt: 2 }}>
+      <Stack spacing={2}>
         <Stack direction="row" spacing={2} alignItems="flex-start">
           <TextField
             autoFocus

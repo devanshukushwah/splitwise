@@ -41,6 +41,7 @@ import ShareIcon from "@mui/icons-material/Share";
 import SpendTable from "@/components/SpendTable";
 import { Label, People } from "@mui/icons-material";
 import PeopleDialog from "@/components/PeopleDialog";
+import HistoryIcon from "@mui/icons-material/History";
 
 import { deletePeople, getPeople, postPeople } from "@/api/people";
 import { getSpends, postSpend, putSpend } from "@/api/spend";
@@ -51,9 +52,10 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import CenteredErrorMessage from "@/components/CenteredErrorMessage";
 import { ApiContextType } from "@/common/ApiContextType";
 import LazyInvoke from "@/utils/LazyInvoke";
+import HistoryDialog from "@/components/HistoryDialog";
 
 const SpendTrackerPage = ({ entry_id }) => {
-  const { people, loading } = useApiState();
+  const { people, loading, dialog } = useApiState();
   const dispatch = useApiDispatch();
 
   const [open, setOpen] = useState(false);
@@ -236,7 +238,7 @@ const SpendTrackerPage = ({ entry_id }) => {
           loading={spendLoading}
         />
       )}
-
+      <HistoryDialog entryId={entry_id} />
       <Box>
         <Stack direction="row" spacing={2} mb={3}>
           <Button
@@ -254,6 +256,19 @@ const SpendTrackerPage = ({ entry_id }) => {
             color="secondary"
           >
             Add Spend
+          </Button>
+          <Button
+            variant="text"
+            onClick={() =>
+              dispatch({
+                type: ApiContextType.OPEN_DIALOG,
+                value: { type: "history" },
+              })
+            }
+            startIcon={<HistoryIcon />}
+            color="secondary"
+          >
+            History
           </Button>
         </Stack>
         {loading?.fetchSpend || loading?.fetchPeople ? (

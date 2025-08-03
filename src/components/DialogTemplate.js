@@ -41,8 +41,17 @@ function DialogTemplate({
   title = "Dialog",
   disableActions = false,
 }) {
+  const dispatch = useApiDispatch();
+
+  const handleOnClose = () => {
+    if (onClose) {
+      onClose();
+    }
+    dispatch({ type: ApiContextType.CLOSE_DIALOG });
+  };
+
   return (
-    <Dialog open={isOpen} onClose={onClose} fullWidth maxWidth="sm">
+    <Dialog open={isOpen} onClose={handleOnClose} fullWidth maxWidth="sm">
       <DialogTitle
         sx={{
           display: "flex",
@@ -58,7 +67,7 @@ function DialogTemplate({
           {title}
         </Typography>
         <Button
-          onClick={onClose}
+          onClick={handleOnClose}
           sx={{ minWidth: 0, color: "grey.600" }}
           aria-label="close"
         >
@@ -66,10 +75,10 @@ function DialogTemplate({
         </Button>
       </DialogTitle>
 
-      <DialogContent>{children}</DialogContent>
+      <DialogContent sx={{ mt: AppConstants.GAP }}>{children}</DialogContent>
       {!disableActions && (
         <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
-          <Button onClick={onClose} color="secondary">
+          <Button onClick={handleOnClose} color="secondary">
             {cancelLabel}
           </Button>
           <Button

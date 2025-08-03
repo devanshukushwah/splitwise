@@ -12,6 +12,15 @@ const doPeopleMap = (people) => {
   return peopleMap;
 };
 
+const doPeopleNameMap = (people) => {
+  let peopleNameMap = {};
+  for (let person of people) {
+    peopleNameMap[person.userId] = person?.user?.firstName;
+  }
+
+  return peopleNameMap;
+};
+
 const initialState = {
   dirPath: [],
   people: [],
@@ -25,13 +34,15 @@ const initialState = {
     data: null,
   },
   peopleMap: {},
+  peopleNameMap: {},
 };
 
 function apiReducer(state, action) {
   switch (action.type) {
     case ApiContextType.UPDATE_PEOPLE:
       const peopleMap = doPeopleMap(action.value);
-      return { ...state, people: action.value, peopleMap };
+      const peopleNameMap = doPeopleNameMap(action.value);
+      return { ...state, people: action.value, peopleMap, peopleNameMap };
     case ApiContextType.UPDATE_DIR_PATH:
       return { ...state, dirPath: action.value };
     case ApiContextType.START_FETCH_PEOPLE_LOADING:
@@ -42,6 +53,26 @@ function apiReducer(state, action) {
       return { ...state, loading: { ...state.loading, fetchSpend: true } };
     case ApiContextType.STOP_FETCH_SPEND_LOADING:
       return { ...state, loading: { ...state.loading, fetchSpend: false } };
+    case ApiContextType.OPEN_DIALOG:
+      return {
+        ...state,
+        dialog: {
+          isOpen: true,
+          type: action.value.type,
+          data: action.value.data || null,
+        },
+      };
+      break;
+    case ApiContextType.CLOSE_DIALOG:
+      return {
+        ...state,
+        dialog: {
+          isOpen: false,
+          type: null,
+          data: null,
+        },
+      };
+      break;
     default:
       throw new Error(`Unhandled action: ${action.type}`);
   }
