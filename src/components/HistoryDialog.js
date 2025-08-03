@@ -18,6 +18,9 @@ import DialogTemplate from "./DialogTemplate";
 import { useApiState } from "@/context/ApiStateContext";
 import { globalFormatWithLocalize } from "@/utils/DateUtils";
 import { getHistory } from "@/api/history";
+import App from "next/app";
+import { AppConstants } from "@/common/AppConstants";
+import { joinList } from "@/utils/ListUtils";
 
 const Row = ({ row }) => {
   const [open, setOpen] = useState(false);
@@ -49,10 +52,10 @@ const Row = ({ row }) => {
                   newValue = peopleMap[change.new];
                 } else if (change.key === "spend_for") {
                   prevValue = Array.isArray(change.prev)
-                    ? change.prev.map((id) => peopleMap[id])
+                    ? joinList(change.prev.map((id) => peopleMap[id]))
                     : peopleMap[change.prev];
                   newValue = Array.isArray(change.new)
-                    ? change.new.map((id) => peopleMap[id])
+                    ? joinList(change.new.map((id) => peopleMap[id]))
                     : peopleMap[change.new];
                 } else {
                   prevValue = change.prev;
@@ -61,7 +64,10 @@ const Row = ({ row }) => {
 
                 return (
                   <Typography key={idx} variant="body2" sx={{ mb: 1 }}>
-                    <strong>{change.key}</strong>:{" "}
+                    <strong>
+                      {AppConstants.HISTORY_KEYS[row.collection]?.[change.key]}
+                    </strong>
+                    :{" "}
                     {change.prev !== undefined && (
                       <>
                         <span style={{ color: "red" }}>
@@ -136,7 +142,7 @@ function HistoryDialog({ entryId }) {
 
   return (
     <>
-      <DialogTemplate isOpen={dialog.isOpen} title="History">
+      <DialogTemplate isOpen={dialog.isOpen} title="History" disableActions>
         <HistoryTable history={history} />
       </DialogTemplate>
     </>

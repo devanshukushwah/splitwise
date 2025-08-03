@@ -114,7 +114,7 @@ function SpendDialog({
             size="small"
           />
           <TextField
-            label="Spend By"
+            label="Paid By"
             name="spend_by"
             fullWidth
             select
@@ -134,7 +134,7 @@ function SpendDialog({
           <Stack direction="row" spacing={1}>
             <TextField
               size="small"
-              label="Spend For"
+              label="Paid For"
               name="spend_for"
               fullWidth
               select

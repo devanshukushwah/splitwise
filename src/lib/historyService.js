@@ -96,6 +96,7 @@ export async function addHistory(
   let history = {
     entryId: new ObjectId(entryId),
     type: methodTypes[methodType] || "Unknown",
+    collection: collectionType,
     created_by: new ObjectId(user._id),
     created_at: new Date(),
   };

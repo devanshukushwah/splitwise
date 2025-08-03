@@ -12,3 +12,19 @@ export const AppConstants = {
   PUT: "PUT",
   GAP: 2,
 };
+
+// Now assign dependent keys
+AppConstants.HISTORY_KEYS = {
+  [AppConstants.SPENDS]: {
+    title: "Title",
+    amount: "Amount",
+    spend_by: "Paid By",
+    spend_for: "Paid For",
+  },
+  [AppConstants.PEOPLE]: {
+    person_id: "Person Name",
+  },
+  [AppConstants.ENTRIES]: {
+    entryName: "Entry Name",
+  },
+};
