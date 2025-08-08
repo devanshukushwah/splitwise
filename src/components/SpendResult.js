@@ -42,7 +42,7 @@ const style = {
 };
 
 function ShowResultBox({ list }) {
-  const { peopleMap } = useApiState();
+  const { peopleNameMap } = useApiState();
 
   if (!list || list.length === 0) {
     return <Typography>No transactions to show</Typography>;
@@ -59,8 +59,8 @@ function ShowResultBox({ list }) {
                   <Currency
                     amount={spend.amount}
                     rightLabel={` : ${
-                      peopleMap[spend.from_person_id]
-                    } should pay ${peopleMap[spend.to_person_id]}`}
+                      peopleNameMap[spend.from_person_id]
+                    } should pay ${peopleNameMap[spend.to_person_id]}`}
                   />
                 </Box>
               }
