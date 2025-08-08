@@ -10,6 +10,7 @@ export const AppConstants = {
   SPENDS_OFFLINE: "spends_offline",
   POST: "POST",
   PUT: "PUT",
+  DELETE: "DELETE",
   GAP: 2,
 };
 
@@ -22,7 +23,7 @@ AppConstants.HISTORY_KEYS = {
     spend_for: "Paid For",
   },
   [AppConstants.PEOPLE]: {
-    person_id: "Person Name",
+    userId: "Person Name",
   },
   [AppConstants.ENTRIES]: {
     entryName: "Entry Name",

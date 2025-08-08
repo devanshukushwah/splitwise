@@ -113,7 +113,7 @@ export const POST = withAuth(async (request, { params }) => {
     addHistory(
       entry_id,
       null,
-      { person_id: newPerson.userId.toString() },
+      { userId: newPerson.userId.toString() },
       AppConstants.POST,
       AppConstants.PEOPLE,
       request.user

@@ -3,15 +3,6 @@
 import { ApiContextType } from "@/common/ApiContextType";
 import { createContext, useReducer, useContext } from "react";
 
-const doPeopleMap = (people) => {
-  let peopleMap = {};
-  for (let person of people) {
-    peopleMap[person._id] = person?.user?.firstName;
-  }
-
-  return peopleMap;
-};
-
 const doPeopleNameMap = (people) => {
   let peopleNameMap = {};
   for (let person of people) {
@@ -40,9 +31,8 @@ const initialState = {
 function apiReducer(state, action) {
   switch (action.type) {
     case ApiContextType.UPDATE_PEOPLE:
-      const peopleMap = doPeopleMap(action.value);
       const peopleNameMap = doPeopleNameMap(action.value);
-      return { ...state, people: action.value, peopleMap, peopleNameMap };
+      return { ...state, people: action.value, peopleNameMap };
     case ApiContextType.UPDATE_DIR_PATH:
       return { ...state, dirPath: action.value };
     case ApiContextType.START_FETCH_PEOPLE_LOADING:

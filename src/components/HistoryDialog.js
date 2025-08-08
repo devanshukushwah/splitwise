@@ -24,7 +24,7 @@ import { joinList } from "@/utils/ListUtils";
 
 const Row = ({ row }) => {
   const [open, setOpen] = useState(false);
-  const { peopleMap, peopleNameMap } = useApiState();
+  const { peopleNameMap } = useApiState();
 
   return (
     <>
@@ -47,16 +47,16 @@ const Row = ({ row }) => {
               </Typography>
               {row.changes.map((change, idx) => {
                 let prevValue, newValue;
-                if (change.key === "spend_by" || change.key === "person_id") {
-                  prevValue = peopleMap[change.prev];
-                  newValue = peopleMap[change.new];
+                if (change.key === "spend_by" || change.key === "userId") {
+                  prevValue = peopleNameMap[change.prev];
+                  newValue = peopleNameMap[change.new];
                 } else if (change.key === "spend_for") {
                   prevValue = Array.isArray(change.prev)
-                    ? joinList(change.prev.map((id) => peopleMap[id]))
-                    : peopleMap[change.prev];
+                    ? joinList(change.prev.map((id) => peopleNameMap[id]))
+                    : peopleNameMap[change.prev];
                   newValue = Array.isArray(change.new)
-                    ? joinList(change.new.map((id) => peopleMap[id]))
-                    : peopleMap[change.new];
+                    ? joinList(change.new.map((id) => peopleNameMap[id]))
+                    : peopleNameMap[change.new];
                 } else {
                   prevValue = change.prev;
                   newValue = change.new;

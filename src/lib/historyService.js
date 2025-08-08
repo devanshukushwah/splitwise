@@ -20,7 +20,6 @@ const getKeys = (obj) => {
     "created_by",
     "changed_at",
     "changed_by",
-    "userId",
     "entry_id",
   ];
   return (

@@ -10,9 +10,9 @@ export const DELETE = withAuth(async (request, { params }) => {
   const collection = db.collection(AppConstants.PEOPLE);
   const entryCollection = db.collection(AppConstants.ENTRIES);
 
-  const { person_id, entry_id } = params;
+  const { userId, entry_id } = params;
 
-  if (!person_id) {
+  if (!userId || !entry_id) {
     return new Response(JSON.stringify({ error: "invalid data" }), {
       status: 400,
       headers: { "Content-Type": "application/json" },
@@ -22,7 +22,7 @@ export const DELETE = withAuth(async (request, { params }) => {
   const { email } = request.user;
 
   const result = await collection.updateOne(
-    { _id: new ObjectId(person_id) },
+    { userId: new ObjectId(userId), entry_id: new ObjectId(entry_id) },
     { $set: { isDeleted: true } }
   );
 
@@ -40,7 +40,7 @@ export const DELETE = withAuth(async (request, { params }) => {
 
   addHistory(
     entry_id,
-    { _id: new ObjectId(person_id) },
+    { userId: new ObjectId(userId) },
     null,
     AppConstants.DELETE,
     AppConstants.PEOPLE,

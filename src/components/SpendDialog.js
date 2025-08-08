@@ -60,10 +60,10 @@ function SpendDialog({
 
   // Method to select all people for spend_for
   const handleSelectAll = () => {
-    const allIds = people
+    const allUserIds = people
       .filter((item) => item?.isDeleted !== true)
-      .map((person) => person._id);
-    setSpend({ ...spend, spend_for: allIds });
+      .map((person) => person.userId);
+    setSpend({ ...spend, spend_for: allUserIds });
   };
 
   return (
@@ -126,7 +126,7 @@ function SpendDialog({
             {people
               ?.filter((item) => item?.isDeleted !== true)
               ?.map((person) => (
-                <MenuItem key={person._id} value={person._id}>
+                <MenuItem key={person.userId} value={person.userId}>
                   <ListItemText primary={displayPersonName(person)} />
                 </MenuItem>
               ))}
@@ -142,7 +142,7 @@ function SpendDialog({
                 multiple: true,
                 renderValue: (selected) =>
                   people
-                    .filter((p) => selected.includes(p._id))
+                    .filter((p) => selected.includes(p.userId))
                     .map((p) => displayPersonName(p))
                     .join(", "),
               }}
@@ -158,9 +158,11 @@ function SpendDialog({
               {people
                 ?.filter((item) => item?.isDeleted !== true)
                 ?.map((person) => (
-                  <MenuItem key={person._id} value={person._id}>
+                  <MenuItem key={person.userId} value={person.userId}>
                     <Checkbox
-                      checked={spend?.spend_for?.includes(person._id) || false}
+                      checked={
+                        spend?.spend_for?.includes(person.userId) || false
+                      }
                     />
                     <ListItemText primary={displayPersonName(person)} />
                   </MenuItem>
@@ -169,12 +171,12 @@ function SpendDialog({
                 ?.filter(
                   (item) =>
                     item?.isDeleted === true &&
-                    spend?.spend_for?.includes(item._id)
+                    spend?.spend_for?.includes(item.userId)
                 )
                 ?.map((person) => (
                   <MenuItem
-                    key={person._id}
-                    value={person._id}
+                    key={person.userId}
+                    value={person.userId}
                     sx={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -184,7 +186,7 @@ function SpendDialog({
                     <Box sx={{ display: "flex", alignItems: "center" }}>
                       <Checkbox
                         checked={
-                          spend?.spend_for?.includes(person._id) || false
+                          spend?.spend_for?.includes(person.userId) || false
                         }
                       />
                       <ListItemText primary={displayPersonName(person)} />

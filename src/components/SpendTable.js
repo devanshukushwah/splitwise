@@ -17,7 +17,7 @@ import { globalFormatWithLocalize } from "@/utils/DateUtils";
 import { useApiState } from "@/context/ApiStateContext";
 
 function SpendTable({ spends, people, onEdit }) {
-  const { peopleMap } = useApiState();
+  const { peopleNameMap } = useApiState();
 
   return (
     <TableContainer component={Paper} sx={{ marginTop: 4, boxShadow: 3 }}>
@@ -49,17 +49,17 @@ function SpendTable({ spends, people, onEdit }) {
               </TableCell>
               <TableCell>
                 <Chip
-                  label={peopleMap[spend.spend_by] || "NA"}
+                  label={peopleNameMap[spend.spend_by] || "NA"}
                   variant="outlined"
                   size="small"
                 />
               </TableCell>
               <TableCell>
                 <Stack direction="row" spacing={0.5}>
-                  {spend?.spend_for?.map((person_id) => (
+                  {spend?.spend_for?.map((userId) => (
                     <Chip
-                      key={person_id}
-                      label={peopleMap[person_id] || "NA"}
+                      key={userId}
+                      label={peopleNameMap[userId] || "NA"}
                       variant="outlined"
                       size="small"
                     />

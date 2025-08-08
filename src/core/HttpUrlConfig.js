@@ -19,8 +19,8 @@ export class HttpUrlConfig {
     return `${this.getBaseUrl()}/entries/${entry_id}/people`;
   }
 
-  static deletePeopleUrl(entry_id, person_id) {
-    return `${this.getBaseUrl()}/entries/${entry_id}/people/${person_id}`;
+  static deletePeopleUrl(entry_id, userId) {
+    return `${this.getBaseUrl()}/entries/${entry_id}/people/${userId}`;
   }
 
   static getEntriesUrl() {

@@ -26,7 +26,7 @@ export const getPeople = async ({ entry_id }) => {
 export const deletePeople = async ({ entry_id, person }) => {
   try {
     const response = await api.delete(
-      HttpUrlConfig.deletePeopleUrl(entry_id, person._id)
+      HttpUrlConfig.deletePeopleUrl(entry_id, person.userId)
     );
     return response?.data;
   } catch (error) {
