@@ -21,29 +21,86 @@ import { getHistory } from "@/api/history";
 import App from "next/app";
 import { AppConstants } from "@/common/AppConstants";
 import { joinList } from "@/utils/ListUtils";
+import { styled } from "@mui/material/styles";
+
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  fontWeight: "bold",
+  backgroundColor: theme.palette.grey[100],
+}));
+
+const StyledRow = styled(TableRow)(({ theme }) => ({
+  "&:hover": {
+    backgroundColor: theme.palette.action.hover,
+  },
+}));
+
+const ChangeLogBox = styled(Box)(({ theme }) => ({
+  background: theme.palette.grey[50],
+  borderRadius: theme.shape.borderRadius,
+  padding: theme.spacing(2),
+  margin: theme.spacing(1, 0),
+}));
 
 const Row = ({ row }) => {
   const [open, setOpen] = useState(false);
   const { peopleNameMap } = useApiState();
 
+  // Define color mapping based on type
+  const typeColorMap = {
+    added: "success.light",
+    updated: "info.light",
+    deleted: "error.light",
+  };
+
+  const typeTextColorMap = {
+    added: "success.contrastText",
+    updated: "info.contrastText",
+    deleted: "error.contrastText",
+  };
+
+  // Lowercase type for mapping
+  const typeKey = row.type?.toLowerCase();
+
   return (
     <>
-      <TableRow>
+      <StyledRow>
         <TableCell>
           <IconButton size="small" onClick={() => setOpen(!open)}>
             {open ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
           </IconButton>
         </TableCell>
         <TableCell>{globalFormatWithLocalize(row.created_at)}</TableCell>
-        <TableCell>{row.type}</TableCell>
-        <TableCell>{peopleNameMap[row.created_by]}</TableCell>
-      </TableRow>
+        <TableCell>
+          <Box
+            sx={{
+              display: "inline-block",
+              px: 1,
+              py: 0.5,
+              bgcolor: typeColorMap[typeKey] || "primary.light",
+              color: typeTextColorMap[typeKey] || "primary.contrastText",
+              borderRadius: 1,
+              fontWeight: 500,
+              fontSize: "0.95em",
+              textTransform: "capitalize",
+            }}
+          >
+            {row.type}
+          </Box>
+        </TableCell>
+        <TableCell>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Typography variant="body2" fontWeight={500}>
+              {peopleNameMap[row.created_by]}
+            </Typography>
+          </Box>
+        </TableCell>
+      </StyledRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
           <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box margin={2}>
-              <Typography variant="subtitle1" gutterBottom>
-                Change Log:
+            <ChangeLogBox>
+              <Typography variant="subtitle1" gutterBottom fontWeight={600}>
+                Change Log
               </Typography>
               {row.changes.map((change, idx) => {
                 let prevValue, newValue;
@@ -63,26 +120,38 @@ const Row = ({ row }) => {
                 }
 
                 return (
-                  <Typography key={idx} variant="body2" sx={{ mb: 1 }}>
-                    <strong>
-                      {AppConstants.HISTORY_KEYS[row.collection]?.[change.key]}
-                    </strong>
-                    :{" "}
+                  <Box key={idx} sx={{ mb: 1, pl: 1 }}>
+                    <Typography variant="body2" component="span">
+                      <strong>
+                        {
+                          AppConstants.HISTORY_KEYS[row.collection]?.[
+                            change.key
+                          ]
+                        }
+                      </strong>
+                      :{" "}
+                    </Typography>
                     {change.prev !== undefined && (
-                      <>
-                        <span style={{ color: "red" }}>
-                          {JSON.stringify(prevValue)}
-                        </span>
+                      <Typography
+                        variant="body2"
+                        component="span"
+                        sx={{ color: "error.main", fontWeight: 500 }}
+                      >
+                        {JSON.stringify(prevValue)}
                         {" → "}
-                      </>
+                      </Typography>
                     )}
-                    <span style={{ color: "green" }}>
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      sx={{ color: "success.main", fontWeight: 500 }}
+                    >
                       {JSON.stringify(newValue)}
-                    </span>
-                  </Typography>
+                    </Typography>
+                  </Box>
                 );
               })}
-            </Box>
+            </ChangeLogBox>
           </Collapse>
         </TableCell>
       </TableRow>
@@ -92,20 +161,14 @@ const Row = ({ row }) => {
 
 const HistoryTable = ({ history }) => {
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ boxShadow: 3 }}>
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell />
-            <TableCell>
-              <strong>Date</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Type</strong>
-            </TableCell>
-            <TableCell>
-              <strong>Modification By</strong>
-            </TableCell>
+            <StyledTableCell />
+            <StyledTableCell>Date</StyledTableCell>
+            <StyledTableCell>Type</StyledTableCell>
+            <StyledTableCell>Modification By</StyledTableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -141,11 +204,11 @@ function HistoryDialog({ entryId }) {
   }, [dialog.isOpen]);
 
   return (
-    <>
-      <DialogTemplate isOpen={dialog.isOpen} title="History" disableActions>
+    <DialogTemplate isOpen={dialog.isOpen} title="History" disableActions>
+      <Box sx={{ minWidth: 400 }}>
         <HistoryTable history={history} />
-      </DialogTemplate>
-    </>
+      </Box>
+    </DialogTemplate>
   );
 }
 
