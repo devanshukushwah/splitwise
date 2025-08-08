@@ -18,6 +18,7 @@ const initialState = {
   loading: {
     fetchSpend: false,
     fetchPeople: false,
+    fetchHistory: false,
   },
   dialog: {
     isOpen: false,
@@ -43,6 +44,10 @@ function apiReducer(state, action) {
       return { ...state, loading: { ...state.loading, fetchSpend: true } };
     case ApiContextType.STOP_FETCH_SPEND_LOADING:
       return { ...state, loading: { ...state.loading, fetchSpend: false } };
+    case ApiContextType.START_FETCH_HISTORY_LOADING:
+      return { ...state, loading: { ...state.loading, fetchHistory: true } };
+    case ApiContextType.STOP_FETCH_HISTORY_LOADING:
+      return { ...state, loading: { ...state.loading, fetchHistory: false } };
     case ApiContextType.OPEN_DIALOG:
       return {
         ...state,

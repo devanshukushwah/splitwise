@@ -15,13 +15,16 @@ import {
 } from "@mui/material";
 import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import DialogTemplate from "./DialogTemplate";
-import { useApiState } from "@/context/ApiStateContext";
+import { useApiDispatch, useApiState } from "@/context/ApiStateContext";
 import { globalFormatWithLocalize } from "@/utils/DateUtils";
 import { getHistory } from "@/api/history";
 import App from "next/app";
 import { AppConstants } from "@/common/AppConstants";
 import { joinList } from "@/utils/ListUtils";
 import { styled } from "@mui/material/styles";
+import Loader from "./Loader";
+import { ApiContextType } from "@/common/ApiContextType";
+import LazyInvoke from "@/utils/LazyInvoke";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   fontWeight: "bold",
@@ -182,17 +185,25 @@ const HistoryTable = ({ history }) => {
 };
 
 function HistoryDialog({ entryId }) {
-  const { dialog } = useApiState();
+  const { dialog, loading } = useApiState();
+  const dispatch = useApiDispatch();
   const [history, setHistory] = useState([]);
 
   const fetchHistory = async () => {
+    dispatch({ type: ApiContextType.START_FETCH_HISTORY_LOADING });
     try {
       const historyResponse = await getHistory({ entryId });
       if (historyResponse.success) {
         setHistory(historyResponse.data.history);
+        LazyInvoke({
+          callback: () =>
+            dispatch({ type: ApiContextType.STOP_FETCH_HISTORY_LOADING }),
+        });
       }
     } catch (error) {
       console.error("Error fetching history:", error);
+      dispatch({ type: ApiContextType.STOP_FETCH_HISTORY_LOADING });
+
       // Handle error appropriately, e.g., show a notification
     }
   };
@@ -205,9 +216,13 @@ function HistoryDialog({ entryId }) {
 
   return (
     <DialogTemplate isOpen={dialog.isOpen} title="History" disableActions>
-      <Box sx={{ minWidth: 400 }}>
-        <HistoryTable history={history} />
-      </Box>
+      {loading.fetchHistory ? (
+        <Loader times={1} height={200} />
+      ) : (
+        <Box sx={{ minWidth: 400 }}>
+          <HistoryTable history={history} />
+        </Box>
+      )}
     </DialogTemplate>
   );
 }
