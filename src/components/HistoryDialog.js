@@ -73,6 +73,7 @@ const Row = ({ row }) => {
           </IconButton>
         </TableCell>
         <TableCell>{globalFormatWithLocalize(row.created_at)}</TableCell>
+        <TableCell>{row.collection}</TableCell>
         <TableCell>
           <Box
             sx={{
@@ -99,12 +100,12 @@ const Row = ({ row }) => {
         </TableCell>
       </StyledRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={4}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={5}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <ChangeLogBox>
-              <Typography variant="subtitle1" gutterBottom fontWeight={600}>
+              {/* <Typography variant="subtitle1" gutterBottom fontWeight={600}>
                 Change Log
-              </Typography>
+              </Typography> */}
               {row.changes.map((change, idx) => {
                 let prevValue, newValue;
                 if (change.key === "spend_by" || change.key === "userId") {
@@ -125,14 +126,7 @@ const Row = ({ row }) => {
                 return (
                   <Box key={idx} sx={{ mb: 1, pl: 1 }}>
                     <Typography variant="body2" component="span">
-                      <strong>
-                        {
-                          AppConstants.HISTORY_KEYS[row.collection]?.[
-                            change.key
-                          ]
-                        }
-                      </strong>
-                      :{" "}
+                      {AppConstants.HISTORY_KEYS[row.collection]?.[change.key]}:{" "}
                     </Typography>
                     {change.prev !== undefined && (
                       <Typography
@@ -171,6 +165,7 @@ const HistoryTable = ({ history }) => {
             <StyledTableCell />
             <StyledTableCell>Date</StyledTableCell>
             <StyledTableCell>Type</StyledTableCell>
+            <StyledTableCell>Operation</StyledTableCell>
             <StyledTableCell>Modification By</StyledTableCell>
           </TableRow>
         </TableHead>
