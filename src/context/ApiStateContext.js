@@ -1,10 +1,14 @@
 "use client";
 
 import { ApiContextType } from "@/common/ApiContextType";
+import { AppConstants } from "@/common/AppConstants";
 import { createContext, useReducer, useContext } from "react";
 
 const doPeopleNameMap = (people) => {
-  let peopleNameMap = {};
+  // initialise with system id as System
+  let peopleNameMap = {
+    [AppConstants.SYSTEM_USER._id]: AppConstants.SYSTEM_USER.firstName,
+  };
   for (let person of people) {
     peopleNameMap[person.userId] = person?.user?.firstName;
   }

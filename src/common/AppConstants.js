@@ -12,6 +12,11 @@ export const AppConstants = {
   PUT: "PUT",
   DELETE: "DELETE",
   GAP: 2,
+  SYSTEM_USER: {
+    _id: "000000000000000000000001",
+    firstName: "System",
+    lastName: "",
+  },
 };
 
 // Now assign dependent keys

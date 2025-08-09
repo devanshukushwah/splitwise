@@ -46,17 +46,19 @@ export const GET = withAuth(async (request, { params }) => {
   });
 });
 
-export const POST = withAuth(async (request, { params }) => {
+/**
+ *
+ * @param {string} entry_id spend entry id
+ * @param {string} email new person email address in spend entry
+ * @param {*} user this is a login user object
+ * @returns
+ */
+export const createPeople = async (entry_id, email, user) => {
   const client = await clientPromise;
   const db = client.db(); // default DB from connection string
   const peopleCollection = db.collection(AppConstants.PEOPLE);
   const userCollection = db.collection(AppConstants.USERS);
   const entryCollection = db.collection(AppConstants.ENTRIES);
-
-  const data = await request.json();
-  const { email } = data;
-  const user = request.user;
-  const { entry_id } = await params;
 
   if (!email || !entry_id) {
     return new Response(JSON.stringify({ error: "invalid data" }), {
@@ -116,7 +118,7 @@ export const POST = withAuth(async (request, { params }) => {
       { userId: newPerson.userId.toString() },
       AppConstants.POST,
       AppConstants.PEOPLE,
-      request.user
+      user
     );
   }
 
@@ -127,4 +129,12 @@ export const POST = withAuth(async (request, { params }) => {
       status: 201,
     }
   );
+};
+
+export const POST = withAuth(async (request, { params }) => {
+  const { email } = await request.json();
+  const user = request.user;
+  const { entry_id } = await params;
+
+  return await createPeople(entry_id, email, user);
 });

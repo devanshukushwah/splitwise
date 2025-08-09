@@ -3,6 +3,7 @@ import { addHistory } from "@/lib/historyService";
 import clientPromise from "@/lib/mongodb";
 import { withAuth } from "@/lib/withAuth";
 import { ObjectId } from "mongodb";
+import { createPeople } from "@/app/api/v1/entries/[entry_id]/people/route";
 
 export const GET = withAuth(async (request) => {
   const client = await clientPromise;
@@ -68,7 +69,13 @@ export const POST = withAuth(async (request) => {
     newEntry,
     AppConstants.POST,
     AppConstants.ENTRIES,
-    request.user
+    AppConstants.SYSTEM_USER
+  );
+
+  await createPeople(
+    newEntry._id.toString(),
+    request.user.email,
+    AppConstants.SYSTEM_USER
   );
 
   return new Response(

@@ -44,7 +44,7 @@ const PeopleDialog = ({
   apiPostPeople,
   apiDeletePeople,
 }) => {
-  const { people } = useApiState();
+  const { people, peopleNameMap } = useApiState();
   const dispatch = useApiDispatch();
   const [person, setPerson] = useState(defaultValue);
   const [error, setError] = useState("");
@@ -200,9 +200,9 @@ const PeopleDialog = ({
               ?.map((person) => (
                 <Tooltip
                   key={person._id}
-                  title={`Added by ${person.created_by} on ${new Date(
-                    person.created_at
-                  ).toLocaleDateString()}`}
+                  title={`Added by ${
+                    peopleNameMap[person.created_by]
+                  } on ${new Date(person.created_at).toLocaleDateString()}`}
                   arrow
                   enterDelay={500}
                   leaveDelay={200}
