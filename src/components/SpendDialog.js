@@ -17,6 +17,7 @@ import {
 import React, { useEffect } from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import { displayPersonName } from "@/utils/PersonUtils";
+import { AppConstants } from "@/common/AppConstants";
 
 const defaultValue = () => ({
   title: "",
@@ -91,7 +92,7 @@ function SpendDialog({
         </Button>
       </DialogTitle>
       <DialogContent>
-        <Stack spacing={2} sx={{ mt: 3 }}>
+        <Stack spacing={2} sx={{ mt: AppConstants.GAP }}>
           <TextField
             label="Title"
             name="title"

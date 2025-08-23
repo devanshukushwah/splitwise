@@ -75,7 +75,9 @@ function DialogTemplate({
         </Button>
       </DialogTitle>
 
-      <DialogContent sx={{ mt: AppConstants.GAP }}>{children}</DialogContent>
+      <DialogContent>
+        <Box mt={AppConstants.GAP}>{children}</Box>
+      </DialogContent>
       {!disableActions && (
         <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
           <Button onClick={handleOnClose} color="secondary">

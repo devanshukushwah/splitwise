@@ -139,6 +139,7 @@ export default function EntryList() {
               fullWidth
               value={entryName}
               onChange={(e) => setEntryName(e.target.value)}
+              size="small"
             />
           </DialogContent>
           <DialogActions sx={{ borderTop: 1, borderColor: "divider" }}>
