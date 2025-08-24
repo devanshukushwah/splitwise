@@ -20,7 +20,10 @@ export async function POST(req) {
   const client = await clientPromise;
   const db = client.db(); // default DB from connection string
   const collection = db.collection(AppConstants.USERS);
-  const user = await collection.findOne({ email: email.toLowerCase() });
+  const user = await collection.findOne({
+    email: email.toLowerCase(),
+    isGuest: false,
+  });
 
   if (!user) {
     return NextResponse.json(

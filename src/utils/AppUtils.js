@@ -18,3 +18,14 @@ export function guessNameFromEmail(email) {
 
   return capitalized?.join(" ");
 }
+
+export function validateArgs(...args) {
+  const missing = args.filter(
+    (val) => val === null || val === undefined || val === ""
+  );
+
+  return {
+    isValid: missing.length === 0,
+    missing,
+  };
+}

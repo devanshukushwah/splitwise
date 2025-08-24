@@ -13,13 +13,17 @@ export async function POST(req) {
     });
   }
 
+  const emailLower = email.toLowerCase();
+
   const client = await clientPromise;
   const db = client.db(); // default DB from connection string
   const collection = db.collection(AppConstants.USERS);
 
-  const dbUser = await collection.findOne({ email });
+  const dbUser = await collection.findOne({
+    email: emailLower,
+  });
 
-  if (dbUser) {
+  if (dbUser && !dbUser?.isGuest) {
     return new Response(
       JSON.stringify({ success: false, error: "User already exists" }),
       {
@@ -38,7 +42,15 @@ export async function POST(req) {
     lastName,
   };
 
-  const result = await collection.insertOne(user);
+  let result = null;
+
+  if (dbUser && dbUser.isGuest) {
+    user.isGuest = false;
+    user.updated_at = new Date();
+    result = await collection.updateOne({ _id: dbUser._id }, { $set: user });
+  } else {
+    result = await collection.insertOne(user);
+  }
 
   if (result.insertedId) {
     return NextResponse.json({
