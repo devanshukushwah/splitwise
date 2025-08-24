@@ -20,12 +20,13 @@ export async function POST(req) {
   const client = await clientPromise;
   const db = client.db(); // default DB from connection string
   const collection = db.collection(AppConstants.USERS);
+
+  const emailLower = email.toLowerCase();
   const user = await collection.findOne({
-    email: email.toLowerCase(),
-    isGuest: false,
+    email: emailLower,
   });
 
-  if (!user) {
+  if (!user || user?.isGuest) {
     return NextResponse.json(
       { error: "Account not exists", success: false },
       { status: 401 }
