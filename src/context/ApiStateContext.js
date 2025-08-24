@@ -23,6 +23,7 @@ const initialState = {
     fetchSpend: false,
     fetchPeople: false,
     fetchHistory: false,
+    addGuest: false,
   },
   dialog: {
     isOpen: false,
@@ -52,6 +53,10 @@ function apiReducer(state, action) {
       return { ...state, loading: { ...state.loading, fetchHistory: true } };
     case ApiContextType.STOP_FETCH_HISTORY_LOADING:
       return { ...state, loading: { ...state.loading, fetchHistory: false } };
+    case ApiContextType.START_ADD_GUEST_LOADING:
+      return { ...state, loading: { ...state.loading, addGuest: true } };
+    case ApiContextType.STOP_ADD_GUEST_LOADING:
+      return { ...state, loading: { ...state.loading, addGuest: false } };
     case ApiContextType.OPEN_DIALOG:
       return {
         ...state,

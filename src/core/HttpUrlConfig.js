@@ -11,6 +11,10 @@ export class HttpUrlConfig {
     return `${this.getBaseUrl()}/register`;
   }
 
+  static getRegisterGuestUrl() {
+    return `${this.getBaseUrl()}/register/guest`;
+  }
+
   static getPeopleUrl(entry_id) {
     return `${this.getBaseUrl()}/entries/${entry_id}/people`;
   }

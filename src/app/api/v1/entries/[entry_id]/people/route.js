@@ -10,10 +10,10 @@ export const GET = withAuth(async (request, { params }) => {
   const peopleCollection = db.collection(AppConstants.PEOPLE);
   const userCollection = db.collection(AppConstants.USERS);
 
-  const { entry_id } = await params;
+  const { entry_id: entryId } = await params;
 
   let people = await peopleCollection
-    .find({ entry_id })
+    .find({ entryId: new ObjectId(entryId) })
     .sort({ created_at: 1 })
     .toArray();
 
@@ -67,10 +67,31 @@ export const createPeople = async (entry_id, email, user) => {
     });
   }
 
+  const emailLower = email.toLowerCase();
+
+  const peopleUser = await userCollection.findOne(
+    { email: emailLower },
+    { projection: { firstName: 1, lastName: 1, email: 1 } }
+  );
+
+  if (!peopleUser) {
+    return new Response(
+      JSON.stringify({
+        success: false,
+        guestRequired: true,
+        error: "User not found",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+
   // Check if the person already exists
   const existingPerson = await peopleCollection.findOne({
-    email: email.toLowerCase(),
-    entry_id,
+    userId: new ObjectId(peopleUser._id),
+    entryId: new ObjectId(entry_id),
   });
 
   if (existingPerson) {
@@ -83,14 +104,9 @@ export const createPeople = async (entry_id, email, user) => {
     );
   }
 
-  const peopleUser = await userCollection.findOne(
-    { email: email.toLowerCase() },
-    { projection: { firstName: 1, lastName: 1, email: 1 } }
-  );
-
   let newPerson = {
     userId: peopleUser._id,
-    entry_id,
+    entryId: new ObjectId(entry_id),
     created_at: new Date(),
     created_by: new ObjectId(user._id),
   };

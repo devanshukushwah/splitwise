@@ -31,6 +31,8 @@ import { ApiContextType } from "@/common/ApiContextType";
 import DialogTemplate from "./DialogTemplate";
 import { displayPersonName } from "@/utils/PersonUtils";
 import { isValidEmail } from "@/utils/AppUtils";
+import { postGuest } from "@/api/user";
+import LazyInvoke from "@/utils/LazyInvoke";
 
 const defaultValue = () => ({
   email: "",
@@ -44,11 +46,12 @@ const PeopleDialog = ({
   apiPostPeople,
   apiDeletePeople,
 }) => {
-  const { people, peopleNameMap } = useApiState();
+  const { people, peopleNameMap, loading } = useApiState();
   const dispatch = useApiDispatch();
   const [person, setPerson] = useState(defaultValue);
   const [error, setError] = useState("");
   const [addPersonLoading, setAddPersonLoading] = useState(false);
+  const [guestRequired, setGuestRequired] = useState(false);
 
   const startAddPersonLoading = () => {
     setAddPersonLoading(true);
@@ -70,13 +73,15 @@ const PeopleDialog = ({
     onClose();
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!isValidEmail(person.email)) {
       setError("Please enter a valid email address.");
       return;
     }
 
-    const findPeople = people.find((item) => item.email === person.email);
+    const findPeople = people.find(
+      (item) => item?.user?.email === person.email
+    );
 
     if (findPeople?.isDeleted === true) {
       setError("This person was added earlier");
@@ -89,11 +94,8 @@ const PeopleDialog = ({
     }
 
     setError("");
-    handlePersonSubmit(person);
-    setPerson(defaultValue());
-  };
+    // handlePersonSubmit(person);
 
-  const handlePersonSubmit = async (person) => {
     startAddPersonLoading();
     try {
       const response = await apiPostPeople({ entry_id, person });
@@ -110,6 +112,13 @@ const PeopleDialog = ({
           },
         });
       } else {
+        if (response?.guestRequired) {
+          setGuestRequired(true);
+          setError("User not found. Please register as a guest first.");
+        } else {
+          setError(response?.error || "Failed to add person.");
+          setPerson(defaultValue());
+        }
         stopAddPersonLoading();
       }
     } catch (error) {
@@ -117,6 +126,70 @@ const PeopleDialog = ({
       stopAddPersonLoading();
     }
   };
+
+  const createGuestUserObject = (person) => {
+    const firstName = person?.email?.split("@")[0]?.slice(0, 6);
+    return {
+      email: person.email,
+      firstName,
+      entryId: entry_id,
+    };
+  };
+
+  const handleGuestSubmit = async () => {
+    try {
+      dispatch({ type: ApiContextType.START_ADD_GUEST_LOADING });
+      const user = createGuestUserObject(person);
+      const response = await postGuest({
+        user,
+      });
+      if (response?.success) {
+        setGuestRequired(false);
+        setPerson(defaultValue());
+        setError("");
+        fetchPeople();
+      } else {
+        setError(response?.error || "Failed to register guest.");
+      }
+      LazyInvoke(() => {
+        dispatch({ type: ApiContextType.STOP_ADD_GUEST_LOADING });
+      });
+    } catch (error) {
+      console.error("Error registering guest:", error);
+      setError("Failed to register guest.");
+    }
+  };
+
+  // const handlePersonSubmit = async (person) => {
+  //   startAddPersonLoading();
+  //   try {
+  //     const response = await apiPostPeople({ entry_id, person });
+  //     if (response?.success) {
+  //       stopAddPersonLoading({
+  //         callback: () => {
+  //           const newPerson = response?.data?.person;
+  //           if (newPerson) {
+  //             dispatch({
+  //               type: ApiContextType.UPDATE_PEOPLE,
+  //               value: [...people, newPerson],
+  //             });
+  //           }
+  //         },
+  //       });
+  //     } else {
+  //       if (response?.guestRequired) {
+  //         setGuestRequired(true);
+  //         setError("User not found. Please register as a guest first.");
+  //       } else {
+  //         setError(response?.error || "Failed to add person.");
+  //       }
+  //       stopAddPersonLoading();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error submitting person:", error);
+  //     stopAddPersonLoading();
+  //   }
+  // };
 
   const fetchPeople = async () => {
     try {
@@ -169,21 +242,35 @@ const PeopleDialog = ({
             onChange={(e) => {
               setPerson({ email: e.target.value });
               if (error) setError("");
+              if (guestRequired) setGuestRequired(false);
             }}
             placeholder="Enter person email"
             error={!!error}
             helperText={error}
             size="small"
           />
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            startIcon={<AddIcon />}
-            sx={{ height: 40, minWidth: 100 }}
-            loading={addPersonLoading}
-          >
-            Add
-          </Button>
+
+          {guestRequired ? (
+            <Button
+              onClick={handleGuestSubmit}
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ height: 40, minWidth: 100 }}
+              loading={loading.addGuest}
+            >
+              Guest
+            </Button>
+          ) : (
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              startIcon={<AddIcon />}
+              sx={{ height: 40, minWidth: 100 }}
+              loading={addPersonLoading}
+            >
+              Add
+            </Button>
+          )}
         </Stack>
         <Divider />
         <Typography variant="subtitle2" color="text.secondary" mb={1}>
