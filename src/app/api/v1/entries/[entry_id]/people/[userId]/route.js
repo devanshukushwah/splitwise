@@ -10,7 +10,7 @@ export const DELETE = withAuth(async (request, { params }) => {
   const collection = db.collection(AppConstants.PEOPLE);
   const entryCollection = db.collection(AppConstants.ENTRIES);
 
-  const { userId, entry_id } = params;
+  const { userId, entry_id } = await params;
 
   if (!userId || !entry_id) {
     return new Response(JSON.stringify({ error: "invalid data" }), {

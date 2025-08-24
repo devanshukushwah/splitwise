@@ -44,7 +44,7 @@ export async function POST(req) {
 
   let result = null;
 
-  if (dbUser && dbUser.isGuest) {
+  if (dbUser && dbUser?.isGuest) {
     user.isGuest = false;
     user.updated_at = new Date();
     result = await collection.updateOne({ _id: dbUser._id }, { $set: user });
@@ -52,7 +52,7 @@ export async function POST(req) {
     result = await collection.insertOne(user);
   }
 
-  if (result.insertedId) {
+  if (result) {
     return NextResponse.json({
       message: "User registered",
       success: true,

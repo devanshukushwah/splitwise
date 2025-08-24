@@ -50,24 +50,7 @@ const PeopleDialog = ({
   const dispatch = useApiDispatch();
   const [person, setPerson] = useState(defaultValue);
   const [error, setError] = useState("");
-  const [addPersonLoading, setAddPersonLoading] = useState(false);
   const [guestRequired, setGuestRequired] = useState(false);
-
-  const startAddPersonLoading = () => {
-    setAddPersonLoading(true);
-  };
-
-  const stopAddPersonLoading = ({
-    callback = () => {},
-    timeout = null,
-  } = {}) => {
-    setTimeout(() => {
-      setAddPersonLoading(false);
-      if (typeof callback === "function") {
-        callback();
-      }
-    }, timeout || AppConstants.TIME_TO_STOP_BUTTON_LOADING);
-  };
 
   const handleClose = () => {
     onClose();
@@ -94,13 +77,11 @@ const PeopleDialog = ({
     }
 
     setError("");
-    // handlePersonSubmit(person);
-
-    startAddPersonLoading();
+    dispatch({ type: ApiContextType.START_ADD_PEOPLE_LOADING });
     try {
       const response = await apiPostPeople({ entry_id, person });
       if (response?.success) {
-        stopAddPersonLoading({
+        LazyInvoke({
           callback: () => {
             const newPerson = response?.data?.person;
             if (newPerson) {
@@ -109,6 +90,7 @@ const PeopleDialog = ({
                 value: [...people, newPerson],
               });
             }
+            dispatch({ type: ApiContextType.STOP_ADD_PEOPLE_LOADING });
           },
         });
       } else {
@@ -119,11 +101,11 @@ const PeopleDialog = ({
           setError(response?.error || "Failed to add person.");
           setPerson(defaultValue());
         }
-        stopAddPersonLoading();
+        dispatch({ type: ApiContextType.STOP_ADD_PEOPLE_LOADING });
       }
     } catch (error) {
       console.error("Error submitting person:", error);
-      stopAddPersonLoading();
+      dispatch({ type: ApiContextType.STOP_ADD_PEOPLE_LOADING });
     }
   };
 
@@ -151,45 +133,16 @@ const PeopleDialog = ({
       } else {
         setError(response?.error || "Failed to register guest.");
       }
-      LazyInvoke(() => {
-        dispatch({ type: ApiContextType.STOP_ADD_GUEST_LOADING });
+      LazyInvoke({
+        callback: () => {
+          dispatch({ type: ApiContextType.STOP_ADD_GUEST_LOADING });
+        },
       });
     } catch (error) {
       console.error("Error registering guest:", error);
       setError("Failed to register guest.");
     }
   };
-
-  // const handlePersonSubmit = async (person) => {
-  //   startAddPersonLoading();
-  //   try {
-  //     const response = await apiPostPeople({ entry_id, person });
-  //     if (response?.success) {
-  //       stopAddPersonLoading({
-  //         callback: () => {
-  //           const newPerson = response?.data?.person;
-  //           if (newPerson) {
-  //             dispatch({
-  //               type: ApiContextType.UPDATE_PEOPLE,
-  //               value: [...people, newPerson],
-  //             });
-  //           }
-  //         },
-  //       });
-  //     } else {
-  //       if (response?.guestRequired) {
-  //         setGuestRequired(true);
-  //         setError("User not found. Please register as a guest first.");
-  //       } else {
-  //         setError(response?.error || "Failed to add person.");
-  //       }
-  //       stopAddPersonLoading();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error submitting person:", error);
-  //     stopAddPersonLoading();
-  //   }
-  // };
 
   const fetchPeople = async () => {
     try {
@@ -266,7 +219,7 @@ const PeopleDialog = ({
               variant="contained"
               startIcon={<AddIcon />}
               sx={{ height: 40, minWidth: 100 }}
-              loading={addPersonLoading}
+              loading={loading.addPeople}
             >
               Add
             </Button>
